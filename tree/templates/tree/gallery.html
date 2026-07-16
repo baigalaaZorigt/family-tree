@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>{{ event.display_title }} · Зураг, видео</title>
 <style>
   :root{ --navy:#26324a; --navy-2:#3a4c6e; --navy-deep:#1c2536; --gold:#c0a24f; --gold-2:#d0b56f;
@@ -39,6 +39,25 @@
   .empty{ text-align:center; padding:50px 20px; color:var(--soft); }
   .empty .big{ font-size:44px; margin-bottom:10px; }
 
+  /* ===== Pagination (ачаалал хуудаслаж тэнцвэржүүлнэ) ===== */
+  .pager{ display:flex; align-items:center; justify-content:center; gap:8px; margin:26px 0 10px; flex-wrap:wrap; }
+  .pgbtn{ font-size:13.5px; color:var(--navy); text-decoration:none; background:var(--card);
+    border:1px solid var(--border); border-radius:9px; padding:8px 13px; }
+  .pgbtn:hover{ border-color:var(--gold); }
+  .pgbtn.disabled{ color:var(--soft); opacity:.5; pointer-events:none; }
+  .pgnums{ display:flex; align-items:center; gap:4px; }
+  .pgnum{ min-width:32px; height:32px; display:grid; place-items:center; border-radius:8px;
+    font-size:13.5px; color:var(--navy); text-decoration:none; }
+  .pgnum:hover{ background:var(--cream); }
+  .pgnum.current{ background:var(--navy); color:#fff; font-weight:700; }
+  .pgdots{ color:var(--soft); padding:0 3px; }
+
+  /* Lightbox дахь бүтэн зураг ачаалж байх үеийн spinner */
+  .lb-spin{ position:absolute; width:44px; height:44px; border-radius:50%;
+    border:4px solid rgba(255,255,255,.2); border-top-color:#fff; animation:lbspin .8s linear infinite; display:none; }
+  .lb-spin.show{ display:block; }
+  @keyframes lbspin{ to{ transform:rotate(360deg); } }
+
   /* ===== Lightbox ===== */
   .lb{ position:fixed; inset:0; z-index:100; background:rgba(8,10,16,.96); display:none;
     flex-direction:column; touch-action:none; }
@@ -50,10 +69,9 @@
     width:42px; height:42px; border-radius:50%; font-size:18px; display:grid; place-items:center; }
   .lb-btn:hover{ background:rgba(255,255,255,.22); }
   .lb-btn.dl{ margin-left:auto; }
-  .lb-stage{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; }
+  .lb-stage{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; touch-action:none; }
   .lb-stage img{ max-width:100%; max-height:100%; object-fit:contain; user-select:none;
-    -webkit-user-drag:none; transition:transform .15s ease; will-change:transform; }
-  .lb-stage img.zoom{ transition:none; cursor:grab; }
+    -webkit-user-drag:none; will-change:transform; cursor:zoom-in; touch-action:none; }
   .lb-stage video{ max-width:100%; max-height:100%; }
   .lb-nav{ position:absolute; top:50%; transform:translateY(-50%); width:50px; height:70px;
     border:none; background:rgba(255,255,255,.10); color:#fff; font-size:26px; cursor:pointer;
@@ -84,7 +102,11 @@
   {% if event.description %}<p class="edesc">{{ event.description }}</p>{% endif %}
 
   {% if media %}
-    <div class="count">{{ media|length }} зураг / видео · дарж томруулна</div>
+    <div class="count">
+      {{ total_count }} зураг / видео
+      {% if page_obj.paginator.num_pages > 1 %} · {{ page_obj.number }}-р хуудас ({{ page_obj.paginator.num_pages }}-с){% endif %}
+      · дарж томруулна
+    </div>
     <div class="grid">
       {% for m in media %}
         <div class="cell" data-i="{{ forloop.counter0 }}">
@@ -93,11 +115,38 @@
             {% else %}<video src="{{ m.url }}#t=0.1" preload="metadata" muted></video>{% endif %}
             <div class="play">▶</div>
           {% else %}
-            <img src="{{ m.url }}" loading="lazy" alt="{{ m.caption }}">
+            {# ачаалал тэнцвэржүүлэх: grid дээр жижиг thumbnail, бүтэн зургийг зөвхөн lightbox нээхэд татна #}
+            <img src="{{ m.thumbnail_url|default:m.url }}" loading="lazy" alt="{{ m.caption }}">
           {% endif %}
         </div>
       {% endfor %}
     </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pager">
+        {% if page_obj.has_previous %}
+          <a class="pgbtn" href="?page={{ page_obj.previous_page_number }}">‹ Өмнөх</a>
+        {% else %}
+          <span class="pgbtn disabled">‹ Өмнөх</span>
+        {% endif %}
+        <div class="pgnums">
+          {% for n in page_obj.paginator.page_range %}
+            {% if n == page_obj.number %}
+              <span class="pgnum current">{{ n }}</span>
+            {% elif n == 1 or n == page_obj.paginator.num_pages or n|add:"-1" == page_obj.number or n|add:"1" == page_obj.number %}
+              <a class="pgnum" href="?page={{ n }}">{{ n }}</a>
+            {% elif n == 2 or n == page_obj.paginator.num_pages|add:"-1" %}
+              <span class="pgdots">…</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if page_obj.has_next %}
+          <a class="pgbtn" href="?page={{ page_obj.next_page_number }}">Дараах ›</a>
+        {% else %}
+          <span class="pgbtn disabled">Дараах ›</span>
+        {% endif %}
+      </nav>
+    {% endif %}
   {% else %}
     <div class="empty">
       <div class="big">📷</div>
@@ -115,6 +164,7 @@
     <button class="lb-btn dl" id="lbDownload" title="Татах">⬇</button>
   </div>
   <div class="lb-stage" id="lbStage">
+    <div class="lb-spin" id="lbSpin"></div>
     <button class="lb-nav lb-prev" id="lbPrev" aria-label="Өмнөх">‹</button>
     <button class="lb-nav lb-next" id="lbNext" aria-label="Дараах">›</button>
   </div>
@@ -125,23 +175,63 @@
 const MEDIA = {{ media_json|safe }};
 const lb = document.getElementById('lb'), stage = document.getElementById('lbStage'),
       capEl = document.getElementById('lbCap'), countEl = document.getElementById('lbCount'),
-      prevBtn = document.getElementById('lbPrev'), nextBtn = document.getElementById('lbNext');
-let cur = 0, zoomed = false;
+      prevBtn = document.getElementById('lbPrev'), nextBtn = document.getElementById('lbNext'),
+      spinEl = document.getElementById('lbSpin');
+let cur = 0, curImg = null;
+
+/* ---- Zoom/pan төлөв (томруулах · чирж харах) ---- */
+const MAX_ZOOM = 4;
+let zScale = 1, zTx = 0, zTy = 0;
+function applyZoom(animate){
+  if(!curImg) return;
+  curImg.style.transition = animate ? 'transform .18s ease' : 'none';
+  curImg.style.transform = `translate(${zTx}px, ${zTy}px) scale(${zScale})`;
+}
+function resetZoom(animate){ zScale = 1; zTx = 0; zTy = 0; applyZoom(animate); }
+function zoomBy(factor, ox, oy){
+  const next = Math.min(MAX_ZOOM, Math.max(1, zScale * factor));
+  const ratio = next / zScale;
+  zTx = ox + (zTx - ox) * ratio;
+  zTy = oy + (zTy - oy) * ratio;
+  zScale = next;
+  if(zScale <= 1.02){ resetZoom(true); return; }
+  applyZoom(false);
+}
+function toggleTapZoom(clientX, clientY){
+  if(!curImg) return;
+  const r = stage.getBoundingClientRect();
+  const ox = clientX - r.left - r.width/2, oy = clientY - r.top - r.height/2;
+  if(zScale > 1) resetZoom(true);
+  else zoomBy(2.6, ox, oy);
+}
 
 function render(){
-  // хуучин зураг/видеог арилгах (nav товчнуудыг үлдээнэ)
+  // хуучин зураг/видеог арилгах (nav товч, spinner-г үлдээнэ)
   stage.querySelectorAll('img,video').forEach(el => el.remove());
+  curImg = null;
   const m = MEDIA[cur];
   let el;
   if(m.type === 'video'){
     el = document.createElement('video');
     el.src = m.url; el.controls = true; el.autoplay = true; el.playsInline = true;
+    spinEl.classList.remove('show');
   } else {
     el = document.createElement('img');
-    el.src = m.url; el.alt = m.caption || '';
-    el.addEventListener('dblclick', toggleZoom);
+    // эхлээд жижиг thumbnail-аар шуурхай харуулж, бүтэн зургийг арын дэвсгэрт ачаална
+    el.src = m.poster || m.url;
+    el.alt = m.caption || '';
+    curImg = el;
+    if(m.poster && m.poster !== m.url){
+      spinEl.classList.add('show');
+      const full = new Image();
+      full.onload = () => { el.src = m.url; spinEl.classList.remove('show'); };
+      full.onerror = () => spinEl.classList.remove('show');
+      full.src = m.url;
+    } else {
+      spinEl.classList.remove('show');
+    }
   }
-  zoomed = false;
+  zScale = 1; zTx = 0; zTy = 0;
   stage.appendChild(el);
   capEl.textContent = m.caption || '';
   countEl.textContent = (cur+1) + ' / ' + MEDIA.length;
@@ -151,15 +241,105 @@ function render(){
 function open(i){ cur = i; lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden'; render(); }
 function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true');
-  document.body.style.overflow=''; stage.querySelectorAll('img,video').forEach(el=>el.remove()); }
-function go(d){ if(zoomed) return; cur = (cur + d + MEDIA.length) % MEDIA.length; render(); }
+  document.body.style.overflow=''; stage.querySelectorAll('img,video').forEach(el=>el.remove()); curImg=null; }
+function go(d){ if(zScale > 1) return; cur = (cur + d + MEDIA.length) % MEDIA.length; render(); }
 
-function toggleZoom(e){
-  const img = e.currentTarget;
-  zoomed = !zoomed;
-  if(zoomed){ img.classList.add('zoom'); img.style.transform = 'scale(2.2)'; }
-  else { img.classList.remove('zoom'); img.style.transform = ''; }
+/* ---- Хулгана/хурууны pointer events: pinch-zoom · чирж харах (pan) · шудрах ---- */
+const pointers = new Map();
+let pinchStartDist = 0, pinchStartScale = 1;
+let dragStartX = 0, dragStartY = 0, dragStartTx = 0, dragStartTy = 0, dragging = false;
+let lastTapTime = 0, lastTapX = 0, lastTapY = 0;
+let wasPinch = false;  // энэ дохио pinch (2 хуруу) агуулсан эсэх — pinch-ийн дараах "swipe" алдаанаас сэргийлнэ
+
+function ptDist(a, b){ return Math.hypot(a.x - b.x, a.y - b.y); }
+function ptMid(a, b){ return { x: (a.x+b.x)/2, y: (a.y+b.y)/2 }; }
+
+stage.addEventListener('pointerdown', e => {
+  if(!curImg) return;
+  // Зөвхөн зурган дээр л (эсвэл аль хэдийн 2 хуруу pinch хийж байх үед) чирэх/зумдах эхэлнэ
+  if(e.target !== curImg && pointers.size === 0) return;
+  stage.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if(pointers.size === 2){
+    const [a, b] = [...pointers.values()];
+    pinchStartDist = ptDist(a, b);
+    pinchStartScale = zScale;
+    dragging = false;
+    wasPinch = true;
+  } else if(pointers.size === 1){
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    dragStartTx = zTx; dragStartTy = zTy;
+    dragging = true;
+  }
+});
+stage.addEventListener('pointermove', e => {
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if(pointers.size === 2){
+    const [a, b] = [...pointers.values()];
+    const dist = ptDist(a, b);
+    if(pinchStartDist > 0){
+      const r = stage.getBoundingClientRect();
+      const mid = ptMid(a, b);
+      const ox = mid.x - r.left - r.width/2, oy = mid.y - r.top - r.height/2;
+      const next = Math.min(MAX_ZOOM, Math.max(1, pinchStartScale * (dist / pinchStartDist)));
+      const ratio = next / zScale;
+      zTx = ox + (zTx - ox) * ratio; zTy = oy + (zTy - oy) * ratio;
+      zScale = next;
+      applyZoom(false);
+    }
+  } else if(pointers.size === 1 && dragging){
+    const dx = e.clientX - dragStartX, dy = e.clientY - dragStartY;
+    if(zScale > 1){
+      zTx = dragStartTx + dx; zTy = dragStartTy + dy;
+      applyZoom(false);
+    }
+  }
+});
+function endPointer(e){
+  // pinch (2 хуруу) орсон дохио бол swipe/tap-г огт шалгахгүй — санамсаргүй "дараагийн зураг" үсрэлтээс сэргийлнэ
+  if(pointers.size === 1 && zScale <= 1 && dragging && !wasPinch){
+    const p = pointers.get(e.pointerId);
+    if(p){
+      const dx = p.x - dragStartX, dy = p.y - dragStartY;
+      if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)){ go(dx < 0 ? 1 : -1); }
+      else {
+        // Хурдан 2 товшилт → тухайн цэг рүү томруулна (double-tap)
+        const now = Date.now();
+        if(now - lastTapTime < 320 && Math.hypot(p.x - lastTapX, p.y - lastTapY) < 30){
+          toggleTapZoom(p.x, p.y); lastTapTime = 0;
+        } else { lastTapTime = now; lastTapX = p.x; lastTapY = p.y; }
+      }
+    }
+  }
+  pointers.delete(e.pointerId);
+  if(pointers.size === 1){
+    // pinch-ийн нэг хуруу гарсан бол үлдсэн хурууны ОДООГИЙН байрлалаас дахин чирэлт эхлүүлнэ (хуучин байрлал ашиглахгүй)
+    const [remaining] = [...pointers.values()];
+    dragStartX = remaining.x; dragStartY = remaining.y;
+    dragStartTx = zTx; dragStartTy = zTy;
+    dragging = true;
+  } else {
+    dragging = false;
+  }
+  if(pointers.size < 2) pinchStartDist = 0;
+  if(pointers.size === 0) wasPinch = false;
+  if(zScale <= 1.02) resetZoom(false);
 }
+stage.addEventListener('pointerup', endPointer);
+stage.addEventListener('pointercancel', endPointer);
+
+// Компьютер: хулганы дугуйгаар zoom (cursor цэгийг тойрч)
+stage.addEventListener('wheel', e => {
+  if(!curImg) return;
+  e.preventDefault();
+  const r = stage.getBoundingClientRect();
+  const ox = e.clientX - r.left - r.width/2, oy = e.clientY - r.top - r.height/2;
+  zoomBy(e.deltaY < 0 ? 1.18 : 0.85, ox, oy);
+}, { passive:false });
+
+// Компьютер: davkhar товших (dblclick) → томруулах/буцаах
+stage.addEventListener('dblclick', e => toggleTapZoom(e.clientX, e.clientY));
 
 // Татах / хадгалах — утсан дээр зургийн галерей (Photos) руу, компьютерт Downloads руу
 async function download(){
@@ -204,15 +384,6 @@ document.addEventListener('keydown', e => {
   else if(e.key === 'ArrowLeft') go(-1);
   else if(e.key === 'ArrowRight') go(1);
 });
-
-// Хос тал руу шудрах (swipe) — 2 тал
-let sx = 0, sy = 0;
-stage.addEventListener('touchstart', e => { if(e.touches.length===1){ sx=e.touches[0].clientX; sy=e.touches[0].clientY; } }, {passive:true});
-stage.addEventListener('touchend', e => {
-  if(zoomed) return;
-  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-  if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
-}, {passive:true});
 </script>
 {% include 'tree/_loader.html' %}
 </body>

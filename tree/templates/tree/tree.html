@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 {% include 'tree/_pwa.html' %}
 <title>Халтарынхан · Ургийн баяр</title>
 <style>
@@ -65,20 +65,22 @@
   .brand b { font-size: 17px; font-weight: 600; display: block; color: #fff; letter-spacing:.5px; }
   .brand span { font-size: 11px; color: var(--gold-2); letter-spacing: .2em; text-transform: uppercase; display: block; }
   .tools { margin-left: auto; display: flex; gap: 8px; align-items: center; flex: 1; justify-content: flex-end; min-width: 180px; }
-  .search { position: relative; flex: 0 1 300px; }
+  /* ====== Мод табын дээрх хайлт ====== */
+  .treesearch { margin-bottom: 10px; }
+  .search { position: relative; width: 100%; }
   .search input {
-    font-family: inherit; font-size: 15px; color: #fff; width: 100%;
-    background: rgba(255,255,255,.10); border: 1px solid rgba(217,179,92,.5);
-    border-radius: 10px; padding: 10px 12px 10px 34px; outline: none; transition: .15s;
+    font-family: inherit; font-size: 15px; color: var(--ink); width: 100%;
+    background: var(--paper); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px 12px 38px; outline: none; transition: .15s;
   }
-  .search input::placeholder { color: rgba(255,255,255,.55); }
-  .search input:focus { border-color: var(--gold-2); background: rgba(255,255,255,.16); }
-  .search > svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--gold-2); }
+  .search input::placeholder { color: var(--soft); }
+  .search input:focus { border-color: var(--gold); }
+  .search > svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--gold-deep); }
   /* search result dropdown */
   .results {
-    position: absolute; top: calc(100% + 8px); right: 0; width: min(92vw, 360px);
+    position: absolute; top: calc(100% + 8px); left: 0; right: 0; width: auto;
     background: var(--paper); border: 1px solid var(--gold); border-radius: 12px;
-    box-shadow: 0 14px 40px rgba(10,28,64,.35); overflow: hidden; display: none; z-index: 45;
+    box-shadow: 0 14px 40px rgba(10,28,64,.18); overflow: hidden; display: none; z-index: 45;
   }
   .results.show { display: block; }
   .results .rhead { font-family:'Trebuchet MS',sans-serif; font-size: 11px; letter-spacing:.12em; text-transform: uppercase; color: var(--gold-deep); padding: 10px 14px 6px; }
@@ -661,11 +663,6 @@
       <div><b>Халтарынхан</b><span>Ургийн баяр</span></div>
     </div>
     <div class="tools">
-      <div class="search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-        <input id="q" placeholder="Нэрээр хайх..." autocomplete="off">
-        <div class="results util" id="results"></div>
-      </div>
       <div class="authbox util">
         {% if user.is_authenticated %}
           <span class="authuser" title="Нэвтэрсэн">👤 {% if me %}{{ me.name }}{% else %}{{ user.username }}{% endif %}</span>
@@ -820,6 +817,13 @@
 
 <main class="tabpane" id="pane-tree">
 <section class="stagewrap" id="stagewrap">
+  <div class="treesearch">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="q" placeholder="Нэрээр хайх..." autocomplete="off">
+      <div class="results util" id="results"></div>
+    </div>
+  </div>
   <div class="focusbar">
     <button class="back" id="overviewBtn">🌳 Бүтэн мод</button>
     <div class="crumb" id="crumb"></div>

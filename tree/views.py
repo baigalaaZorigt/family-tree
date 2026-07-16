@@ -6,6 +6,8 @@ from collections import defaultdict
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Event, Notification, Person, PersonPhoto, Spouse
@@ -390,18 +392,59 @@ def delete_photo(request, pk):
     return redirect('person_detail', pk=person.pk)
 
 
+@login_required
+def remove_avatar(request, pk):
+    """Хувийн зургийг (thumbnail/аватар) шууд устгана — засах хуудаснаас дарж."""
+    person = get_object_or_404(Person, pk=pk)
+    if not can_edit(request, person):
+        messages.error(request, 'Танд энэ зургийг устгах эрх байхгүй байна.')
+        return redirect('person_detail', pk=person.pk)
+    if request.method == 'POST' and person.photo:
+        person.photo.delete(save=False)
+        person.photo = None
+        person.save(update_fields=['photo'])
+        messages.success(request, 'Хувийн зураг устгагдлаа.')
+    return redirect('edit_person', pk=person.pk)
+
+
+GALLERY_PAGE_SIZE = 24
+GALLERY_CACHE_TTL = 600  # 10 мин — S3 жагсаалтыг дахин уншихгүйн тулд кэшлэнэ
+
+
 def event_gallery(request, pk):
-    """Нэг баярын бүх зураг/видеог тусдаа хуудсанд (lightbox-той) харуулна."""
-    event = get_object_or_404(Event.objects.prefetch_related('media'), pk=pk)
-    media = list(event.media.all())
-    media_json = json.dumps([
-        {'type': m.media_type, 'url': m.url, 'poster': m.thumbnail_url, 'caption': m.caption}
-        for m in media
-    ], ensure_ascii=False).replace('</', '<\\/')
+    """Нэг баярын зураг/видеог хуудаслаж, кэштэйгээр (lightbox-той) харуулна.
+    Ачаалал тэнцвэржүүлэх: grid дээр жижиг thumbnail ачаална, бүтэн зургийг зөвхөн
+    lightbox нээх үед л татна; том жагсаалтыг хуудас хуудсаар нь ачаална."""
+    event = get_object_or_404(Event, pk=pk)
+
+    cache_key = f'event_media_{pk}'
+    all_media = cache.get(cache_key)
+    if all_media is None:
+        all_media = [
+            {
+                'id': m.id, 'media_type': m.media_type, 'url': m.url,
+                'thumbnail_url': m.thumbnail_url, 'caption': m.caption,
+            }
+            for m in event.media.all()
+        ]
+        cache.set(cache_key, all_media, GALLERY_CACHE_TTL)
+
+    paginator = Paginator(all_media, GALLERY_PAGE_SIZE)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    # JS lightbox-ийн хүлээж буй товч нэрс (type/poster) рүү хөрвүүлнэ
+    js_media = [
+        {'type': m['media_type'], 'url': m['url'], 'poster': m['thumbnail_url'], 'caption': m['caption']}
+        for m in page_obj.object_list
+    ]
+    media_json = json.dumps(js_media, ensure_ascii=False).replace('</', '<\\/')
     return render(request, 'tree/gallery.html', {
         'event': event,
-        'media': media,
+        'media': page_obj.object_list,
         'media_json': media_json,
+        'page_obj': page_obj,
+        'total_count': len(all_media),
     })
 
 

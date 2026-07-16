@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 {% include 'tree/_pwa.html' %}
 <title>Засах · {{ person.name }}</title>
 <style>
@@ -49,6 +49,11 @@
   h1,h2,h3{ font-family:inherit !important; letter-spacing:-.01em; }
   .card,.authcard{ box-shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.05) !important; }
   .btn,.bigbtn{ background:var(--navy) !important; border-color:var(--navy) !important; }
+  .photowrap{ position:relative; display:inline-block; }
+  .photodel{ position:absolute; top:-6px; right:-6px; width:26px; height:26px; border-radius:50%;
+    border:2px solid #fff; cursor:pointer; background:rgba(0,0,0,.6); color:#fff; font-size:13px;
+    line-height:1; display:grid; place-items:center; z-index:2; }
+  .photodel:hover{ background:rgba(200,40,40,.9); }
 </style>
 </head>
 <body>
@@ -101,8 +106,12 @@
         <label>Хувийн зураг (thumbnail)</label>
         <div class="famhint">Модон дээрх дугуй зураг (аватар) болж харагдана.</div>
         {% if person.photo %}
-          <img class="photo" src="{{ person.photo.url }}" alt="Хувийн зураг" style="max-width:110px;border-radius:50%">
-          <label class="chk"><input type="checkbox" name="remove_avatar" value="1"> Одоогийн зургийг устгах</label>
+          <div class="photowrap">
+            <img class="photo" src="{{ person.photo.url }}" alt="Хувийн зураг" style="max-width:110px;border-radius:50%">
+            <button type="submit" class="photodel" title="Зургийг устгах"
+                    formaction="{% url 'remove_avatar' person.pk %}" formmethod="post"
+                    formnovalidate onclick="return confirm('Хувийн зургийг устгах уу?')">✕</button>
+          </div>
         {% endif %}
         <input type="file" name="photo" accept="image/*">
       </div>

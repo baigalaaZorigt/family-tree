@@ -1,6 +1,7 @@
 import re
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 
 
@@ -181,6 +182,15 @@ class EventMedia(models.Model):
 
     def __str__(self):
         return f'{self.get_media_type_display()} · {self.event.display_title}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete(f'event_media_{self.event_id}')
+
+    def delete(self, *args, **kwargs):
+        event_id = self.event_id
+        super().delete(*args, **kwargs)
+        cache.delete(f'event_media_{event_id}')
 
 
 class Spouse(models.Model):

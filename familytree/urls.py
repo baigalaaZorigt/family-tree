@@ -36,6 +36,7 @@ urlpatterns = [
     path('newtreh/', views.login_view, name='login'),
     path('garah/', views.logout_view, name='logout'),
     path('zasah/<int:pk>/', views.edit_person, name='edit_person'),
+    path('avatar-ustgah/<int:pk>/', views.remove_avatar, name='remove_avatar'),
     path('nemeh/<int:parent_pk>/', views.add_child, name='add_child'),
     path('hani-nemeh/<int:person_pk>/', views.add_spouse, name='add_spouse'),
     path('hani-zasah/<int:pk>/', views.edit_spouse, name='edit_spouse'),
