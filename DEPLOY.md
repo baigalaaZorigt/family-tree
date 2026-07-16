@@ -68,6 +68,16 @@ docker compose exec web python manage.py createsuperuser   # нэмэлт адм
 ```
 
 ## Шинэчлэлт гаргах
+
+**Автоматаар (санал болгоно):** `main` руу push хийхэд GitHub Actions
+(`.github/workflows/deploy.yml`) серверт автоматаар deploy хийнэ —
+`git reset --hard origin/main` → `docker compose build web` →
+`docker compose up -d --force-recreate web`. Ажиллуулахын тулд repo-ийн
+Settings → Secrets and variables → Actions дотор `DEPLOY_HOST`,
+`DEPLOY_USER`, `DEPLOY_SSH_KEY` гэсэн 3 secret тохируулсан байх ёстой.
+Явцыг GitHub-ийн **Actions** таб дээрээс харна.
+
+**Гараар:**
 ```bash
 git pull
 docker compose up -d --build
