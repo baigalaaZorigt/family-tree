@@ -163,6 +163,9 @@ USE_X_FORWARDED_HOST = True
 
 # Uploaded media — AWS_S3_BUCKET тохируулсан бол S3 руу (хүн бүрийн профайл/цомгийн
 # зургийг тусдаа хавтаст оруулдаг, tree/storage.py), эс бөгөөс локал диск (dev).
+# MEDIA_ROOT-г S3 идэвхтэй үед ч тодорхойлсон хэвээр байлгана — хуучин (S3-руу шилжихээс
+# өмнөх) локал файлуудыг унших/шилжүүлэхэд (migrate_media_to_s3 command) хэрэгтэй.
+MEDIA_ROOT = BASE_DIR / 'media'
 AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET', '')
 
 if AWS_S3_BUCKET:
@@ -177,7 +180,6 @@ if AWS_S3_BUCKET:
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 else:
     MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -72,7 +72,7 @@
          "spouse": "Н.Наранцэцэг",
          "bio": "Өндөрхангай суманд айлын ууган хүү болон төрсөн. ХАА-н ТМС-ийг трактор комбайнчин мэргэжлээр төгссөн. 2018 онд «Онц тээвэрчин», «Оны аварга жолооч» болсон. 4 хүүхэдтэй, 2000 оноос УБ хотод суурьшсан.",
          "phone": "86771617",
-         "photo": "person_photos/IMG_0445.jpeg",
+         "photo": "people/8-дарам/profile/IMG_0445.jpeg",
          "order": 1,
          "ch": [
           {
@@ -223,18 +223,18 @@
          "spouse": "О.Дорж",
          "bio": "Хөдөлмөрийн Хүндэт медаль, «Алдарт эх» 2-р одон, Ачлалт ээж медалиар шагнагдсан. Тогооч, оёдолчин. 2012 оноос УБ хотод. 4 хүүхэдтэй.",
          "phone": "99618408",
-         "photo": "person_photos/IMG_0436.jpeg",
+         "photo": "people/25-сувдаа/profile/IMG_0436.jpeg",
          "order": 3,
          "spouses": [
           {
            "name": "Дорж",
            "g": "m",
-           "photo": "spouse_photos/IMG_0438.jpeg"
+           "photo": "people/25-сувдаа/spouse/IMG_0438.jpeg"
           }
          ],
          "album": [
           {
-           "image": "album/IMG_0433.jpeg",
+           "image": "people/25-сувдаа/album/IMG_0433.jpeg",
            "order": 0
           }
          ],
@@ -310,7 +310,7 @@
            "birth": "1996.05.07",
            "spouse": "Б.Зундуйдорж",
            "bio": "Эцэг эхдээ туслан мал маллаж ирсэн. 3 хүүтэй.",
-           "photo": "person_photos/IMG_0441.jpeg",
+           "photo": "people/34-даваагэрэл/profile/IMG_0441.jpeg",
            "order": 2,
            "ch": [
             {
@@ -732,7 +732,7 @@
            "gen": 6,
            "birth": "2005",
            "bio": "12-р ангид сурдаг. Хүндийн өргөлтийн тэмцээнд тусгай байр эзэлж байсан, дуулах авьяастай.",
-           "photo": "person_photos/IMG_0420.jpeg",
+           "photo": "people/84-алтанзул/profile/IMG_0420.jpeg",
            "order": 0
           },
           {
@@ -782,32 +782,31 @@
        "role": "Алдарт эх",
        "birth": "1961",
        "spouse": "Т.Зоригт (1959–2021)",
-       "bio": "Х.Диваахүүгийн бага охин (номонд Дагвадоржийн Нямаа гэж бичсэн). ХАА-н ТМС-ийг мал механикчаар төгссөн. Сум дундын эмнэлэгт асрагч, ариутгалын тасгийн эрхлэгч, 1998 оноос УБ хотод цагдаагийн байгууллагад бичиг хэрэг, өргөдөл гомдол хүлээн авах мэргэжилтнээр ажиллаж байгаад тэтгэвэрт гарсан. Алдарт эхийн одон, Цагдаагийн гавъяа тэмдэг, олон медалиар шагнагдсан.\n\n1983 онд Түрэнгийн Зоригттой гэр бүл болж 3 охин 1 хүү төрүүлсэн. Нөхөр Т.Зоригт нь Давст суманд 1959 онд төрсөн, барилгын кранч байсан, 2021 онд нас барсан.",
        "phone": "88432043",
        "order": 2,
        "album": [
         {
-         "image": "album/IMG_1032.jpeg",
+         "image": "people/89-нямаа/album/IMG_1032.jpeg",
          "order": 0
         },
         {
-         "image": "album/IMG_0902.jpeg",
+         "image": "people/89-нямаа/album/IMG_0902.jpeg",
          "order": 1
         },
         {
-         "image": "album/IMG_0821.jpeg",
+         "image": "people/89-нямаа/album/IMG_0821.jpeg",
          "order": 2
         },
         {
-         "image": "album/IMG_0820.jpeg",
+         "image": "people/89-нямаа/album/IMG_0820.jpeg",
          "order": 3
         },
         {
-         "image": "album/IMG_0818.jpeg",
+         "image": "people/89-нямаа/album/IMG_0818.jpeg",
          "order": 4
         },
         {
-         "image": "album/IMG_0817.jpeg",
+         "image": "people/89-нямаа/album/IMG_0817.jpeg",
          "order": 5
         }
        ],
@@ -820,47 +819,47 @@
          "birth": "1985",
          "spouse": "Б.Мягмарцэрэн (1987)",
          "bio": "ШУУ-ны менежментийн инженерээр төгсч Стимо ХХК-д технологич, Silk grupp-т борлуулалтын албаны дарга. 2010 онд Б.Мягмарцэрэнтэй гэр бүл болж 1 хүү 2 охинтой.",
-         "photo": "person_photos/IMG_0400.jpeg",
+         "photo": "people/90-баярмаа/profile/IMG_0400.jpeg",
          "order": 0,
          "album": [
           {
-           "image": "album/IMG_1117.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1117.jpeg",
            "order": 0
           },
           {
-           "image": "album/IMG_1113.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1113.jpeg",
            "order": 1
           },
           {
-           "image": "album/IMG_1106.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1106.jpeg",
            "order": 2
           },
           {
-           "image": "album/IMG_1096.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1096.jpeg",
            "order": 3
           },
           {
-           "image": "album/IMG_1092.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1092.jpeg",
            "order": 4
           },
           {
-           "image": "album/IMG_1070.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1070.jpeg",
            "order": 5
           },
           {
-           "image": "album/IMG_1075.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1075.jpeg",
            "order": 6
           },
           {
-           "image": "album/IMG_1067.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1067.jpeg",
            "order": 7
           },
           {
-           "image": "album/IMG_1061.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1061.jpeg",
            "order": 8
           },
           {
-           "image": "album/IMG_1052.jpeg",
+           "image": "people/90-баярмаа/album/IMG_1052.jpeg",
            "order": 9
           }
          ],
@@ -895,7 +894,7 @@
          "birth": "1987",
          "spouse": "Б.Жавзандулам (1986)",
          "bio": "ШУТИС-ийн газрын тосны ангийг төгсч Магнай трейд группын агуулахын ерөнхий инженер. 2011 онд Б.Жавзандуламтай гэр бүл болж 2 хүү 1 охинтой.",
-         "photo": "person_photos/IMG_0394.jpeg",
+         "photo": "people/94-гансүх/profile/IMG_0394.jpeg",
          "order": 1,
          "ch": [
           {
@@ -904,7 +903,7 @@
            "gen": 6,
            "birth": "2012",
            "phone": "90054530",
-           "photo": "person_photos/IMG_0390.jpeg",
+           "photo": "people/95-бат-өлзий/profile/IMG_0390.jpeg",
            "order": 0
           },
           {
@@ -936,7 +935,7 @@
            "g": "f",
            "gen": 6,
            "birth": "2022",
-           "photo": "person_photos/IMG_0409.jpeg",
+           "photo": "people/99-баярцэцэг/profile/IMG_0409.jpeg",
            "order": 0
           }
          ]
@@ -950,11 +949,11 @@
          "spouse": "Тамир",
          "bio": "МУИС-ийг компьютер программын хэрэглээний инженерээр төгсч ITZONE ХХК-д ажилласан. 2023 оны 2 сард Ирландад суралцахаар явсан.",
          "phone": "88822642",
-         "photo": "person_photos/baigalaaa_j72fSVs.png",
+         "photo": "people/100-байгалмаа/profile/baigalaaa_j72fSVs.png",
          "order": 3,
          "album": [
           {
-           "image": "album/baigalaaa_wm3zSLh.png",
+           "image": "people/100-байгалмаа/album/baigalaaa_wm3zSLh.png",
            "order": 0
           }
          ]
@@ -997,7 +996,7 @@
        "birth": "1958.03.21",
        "spouse": "Тэртогтох · Б.Пүрэвжав (1942–2006)",
        "bio": "Гүндсамбуу, Ц.Дарьжав хоёрын ууган охин. «Шинэ зам» нэгдэлд саальчин, сумын эмнэлэгт үйлчлэгч, «Жигүүр гранд» СӨХ-д ажиллаж тэтгэвэрт гарсан. Олон арван гавьяа шагнал, медаль хүртсэн, урлаг уран сайхны тэмцээнд идэвхтэй оролцдог. Анхны нөхөр Тэртогтохоос хүү Баяртсайханыг өргөж авсан. 1980 онд Бумбангийн Пүрэвжавтай гэр бүл болж 2 хүү 2 охин төрүүлсэн.",
-       "photo": "person_photos/IMG_0473.jpeg",
+       "photo": "people/104-даваасамба/profile/IMG_0473.jpeg",
        "order": 1,
        "ch": [
         {
@@ -1335,14 +1334,14 @@
        "spouse": "С.Бүзмаа (1969)",
        "bio": "Өндөрхангай сумын эмнэлэгт төрсөн. Ардын цэргийн 166-р ангид алба хааж, «Шинэ зам» нэгдлийн уурын зууханд ажиллаж «Оны аварга ажилтан» болж байв. 1989 онд Санжжавын Бүзмаатай гэр бүл болж 4 хүүтэй болсон.",
        "phone": "95540963",
-       "photo": "person_photos/IMG_0514.jpeg",
+       "photo": "people/144-батбаатар/profile/IMG_0514.jpeg",
        "order": 4,
        "spouses": [
         {
          "name": "С.Бүзмаа",
          "g": "f",
          "birth": "1969",
-         "photo": "spouse_photos/IMG_0517.jpeg"
+         "photo": "people/144-батбаатар/spouse/IMG_0517.jpeg"
         }
        ],
        "ch": [
