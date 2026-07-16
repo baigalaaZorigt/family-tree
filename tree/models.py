@@ -4,6 +4,14 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 
+from .storage import (
+    person_album_path,
+    person_family_photo_path,
+    person_photo_path,
+    s3_storage,
+    spouse_photo_path,
+)
+
 
 def normalize_birth(value):
     """Төрсөн огнооноос зөвхөн цифрүүдийг үлдээж жиших хэлбэрт оруулна.
@@ -33,14 +41,14 @@ class Person(models.Model):
                               help_text='Facebook / Instagram / и-мэйл г.м.')
     address = models.CharField('Гэрийн хаяг', max_length=300, blank=True)
 
-    # ==== Хувийн зураг (thumbnail/аватар дээр харагдана) ====
-    photo = models.ImageField('Хувийн зураг', upload_to='person_photos/',
+    # ==== Хувийн зураг (thumbnail/аватар дээр харагдана) — S3: people/<pk>-<нэр>/profile/ ====
+    photo = models.ImageField('Хувийн зураг', upload_to=person_photo_path, storage=s3_storage(),
                               blank=True, null=True,
                               help_text='Модон дээрх дугуй зураг (thumbnail) болно.')
 
-    # ==== Гэр бүлийн (өрхийн) зураг ====
-    family_photo = models.ImageField('Гэр бүлийн зураг', upload_to='family_photos/',
-                                     blank=True, null=True)
+    # ==== Гэр бүлийн (өрхийн) зураг — S3: people/<pk>-<нэр>/family/ ====
+    family_photo = models.ImageField('Гэр бүлийн зураг', upload_to=person_family_photo_path,
+                                     storage=s3_storage(), blank=True, null=True)
 
     # ==== Модны бүтэц ====
     parent = models.ForeignKey('self', verbose_name='Эцэг/эх', null=True, blank=True,
@@ -207,7 +215,8 @@ class Spouse(models.Model):
     social = models.CharField('Сошиал хаяг', max_length=300, blank=True)
     address = models.CharField('Гэрийн хаяг', max_length=300, blank=True)
     bio = models.TextField('Намтар', blank=True)
-    photo = models.ImageField('Хувийн зураг', upload_to='spouse_photos/', blank=True, null=True)
+    photo = models.ImageField('Хувийн зураг', upload_to=spouse_photo_path, storage=s3_storage(),
+                              blank=True, null=True)
     order = models.PositiveIntegerField('Эрэмбэ', default=0)
 
     class Meta:
@@ -223,7 +232,7 @@ class PersonPhoto(models.Model):
     """Хүний зургийн цомог — олон зураг оруулж, дараа нь нэмж болно."""
     person = models.ForeignKey(Person, verbose_name='Хүн',
                                related_name='album', on_delete=models.CASCADE)
-    image = models.ImageField('Зураг', upload_to='album/')
+    image = models.ImageField('Зураг', upload_to=person_album_path, storage=s3_storage())
     caption = models.CharField('Тайлбар', max_length=200, blank=True)
     order = models.PositiveIntegerField('Эрэмбэ', default=0)
     created_at = models.DateTimeField('Нэмсэн огноо', auto_now_add=True)

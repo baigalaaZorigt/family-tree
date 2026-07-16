@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
     'tree',
 ]
 
@@ -160,9 +161,23 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'   # collectstatic → nginx үүнийг 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
-# Uploaded media (гэр бүлийн зураг)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Uploaded media — AWS_S3_BUCKET тохируулсан бол S3 руу (хүн бүрийн профайл/цомгийн
+# зургийг тусдаа хавтаст оруулдаг, tree/storage.py), эс бөгөөс локал диск (dev).
+AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET', '')
+
+if AWS_S3_BUCKET:
+    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+    AWS_STORAGE_BUCKET_NAME = AWS_S3_BUCKET
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ap-northeast-1')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    AWS_DEFAULT_ACL = None          # bucket policy аль хэдийн public-read (ACL шаардахгүй)
+    AWS_QUERYSTRING_AUTH = False    # нийтийн (public) URL — гарын үсэггүй, S3 CORS-той ажиллана
+    AWS_S3_FILE_OVERWRITE = False   # ижил нэртэй зураг байвал давхардуулахгүй санамсаргүй дугаар нэмнэ
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

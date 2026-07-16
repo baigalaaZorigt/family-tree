@@ -605,11 +605,16 @@ def add_child(request, parent_pk):
         )
         for f in EDITABLE_FIELDS:
             setattr(child, f, request.POST.get(f, '').strip())
+        # Эхлээд зурагтгүйгээр хадгалж pk-г нь авна — S3 дээрх хавтасны нэрэнд
+        # (people/<pk>-<нэр>/...) pk шаардлагатай тул зурагийг хоёр дахь удаагийн
+        # save-ээр л хавсаргана.
+        child.save()
         if request.FILES.get('photo'):
             child.photo = request.FILES['photo']
         if request.FILES.get('family_photo'):
             child.family_photo = request.FILES['family_photo']
-        child.save()
+        if request.FILES.get('photo') or request.FILES.get('family_photo'):
+            child.save()
         Notification.objects.create(
             kind='birth', person=child,
             title=f'🎉 Баяр хүргэе! {child.name} ургийн гэр бүлд нэмэгдлээ',
