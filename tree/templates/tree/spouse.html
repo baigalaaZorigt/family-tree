@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% include 'tree/_pwa.html' %}
+<title>{% if spouse %}Хани засах{% else %}Хань нэмэх{% endif %} · {{ person.name }}</title>
+<style>
+  :root{ --navy:#122a5e; --navy-2:#1c3c7d; --navy-deep:#0a1c40; --gold:#d9b35c; --gold-2:#f0d28a;
+    --gold-deep:#a8842f; --paper:#fbf6ea; --ink:#2c2415; --soft:#8a7c5c; --card:#fffdf6;
+    --border:#e0d2ac; --f:#9c3b52; --f-soft:#f6e8ec; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif; color:var(--ink);
+    min-height:100vh; background-color:#ede0bf;
+    background-image:radial-gradient(1000px 460px at 50% -160px, rgba(18,42,94,.30), transparent 72%),
+      radial-gradient(circle at center, rgba(168,132,47,.10) 1px, transparent 1.6px);
+    background-size:auto,26px 26px; padding:24px; }
+  .wrap{ max-width:560px; margin:0 auto; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:18px;
+    box-shadow:0 18px 50px rgba(10,28,64,.20); padding:26px 24px; }
+  h2{ color:var(--navy-deep); font-size:23px; }
+  .sub{ color:var(--soft); font-size:13.5px; margin:5px 0 18px; font-family:'Trebuchet MS',sans-serif; }
+  .fld{ margin-bottom:15px; }
+  .row2{ display:flex; gap:12px; } .row2 .fld{ flex:1; }
+  .fld label{ display:block; font-size:12.5px; color:var(--gold-deep); letter-spacing:.06em;
+    text-transform:uppercase; margin-bottom:6px; font-family:'Trebuchet MS',sans-serif; }
+  .fld input, .fld textarea, .fld select{ width:100%; font-family:inherit; font-size:15px; color:var(--ink);
+    background:var(--paper); border:1px solid var(--border); border-radius:10px; padding:11px 12px; outline:none; }
+  .fld input:focus, .fld textarea:focus, .fld select:focus{ border-color:var(--gold); }
+  .fld textarea{ min-height:100px; resize:vertical; line-height:1.5; }
+  .photo{ display:block; max-width:160px; border-radius:12px; border:1px solid var(--border); margin-bottom:8px; }
+  .btn{ font-family:inherit; font-size:16px; font-weight:700; cursor:pointer; color:#fff;
+    background:linear-gradient(180deg,var(--navy-2),var(--navy)); border:1px solid var(--gold);
+    border-radius:11px; padding:13px 22px; }
+  .btn:hover{ filter:brightness(1.08); }
+  .btns{ display:flex; gap:12px; align-items:center; margin-top:8px; }
+  .cancel{ color:var(--navy-2); font-size:14px; text-decoration:none; }
+  .del{ margin-left:auto; color:var(--f); font-size:13px; background:none; border:none; cursor:pointer; font-family:'Trebuchet MS',sans-serif; text-decoration:underline; }
+  .note{ font-family:'Trebuchet MS',sans-serif; font-size:12px; color:var(--soft); margin-top:4px; }
+  .err{ background:var(--f-soft); color:var(--f); border:1px solid #e5c2cb; border-radius:10px;
+    padding:10px 12px; font-size:13.5px; margin-bottom:16px; font-family:'Trebuchet MS',sans-serif; }
+  .pinfo{ background:#f6ecef; border:1px solid #e3cdd4; border-radius:10px; padding:11px 13px;
+    font-size:13px; color:var(--f); font-family:'Trebuchet MS',sans-serif; margin-bottom:18px; }
+  .chk{ font-family:'Trebuchet MS',sans-serif; font-size:13px; color:var(--soft); display:flex; gap:7px; align-items:center; margin-top:6px; }
+
+  /* ==== Минимал · мэргэжлийн override ==== */
+  :root{ --navy:#26324a; --navy-2:#3a4c6e; --navy-deep:#1c2536; --gold:#c0a24f; --gold-2:#d0b56f;
+    --gold-deep:#8f7330; --paper:#ffffff; --ink:#1d2432; --soft:#6f7787; --card:#ffffff;
+    --border:#e5e8ed; --line:#e4e7ec; --f:#a04d64; --f-soft:#f6ecf0; }
+  body{ background-color:#f5f6f8 !important; background-image:none !important;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,Arial,sans-serif !important; }
+  h1,h2,h3{ font-family:inherit !important; letter-spacing:-.01em; }
+  .card,.authcard{ box-shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.05) !important; }
+  .btn,.bigbtn{ background:var(--navy) !important; border-color:var(--navy) !important; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="pageback" href="{% url 'person_detail' person.pk %}">← Буцах</a>
+    <form class="card" method="post" enctype="multipart/form-data" data-loader="Хадгалж байна…"
+          action="{% if spouse %}{% url 'edit_spouse' spouse.pk %}{% else %}{% url 'add_spouse' person.pk %}{% endif %}">
+      {% csrf_token %}
+      <h2>{% if spouse %}Ханийн мэдээлэл засах{% else %}Хань (нөхөр/эхнэр) нэмэх{% endif %}</h2>
+      <div class="sub">{{ person.name }}-ийн гэр бүл</div>
+      <div class="pinfo">💍 <b>{{ person.name }}</b>-ийн хань болох хүний өөрийнх нь мэдээллийг оруулна.</div>
+      {% if error %}<div class="err">{{ error }}</div>{% endif %}
+
+      <div class="row2">
+        <div class="fld">
+          <label>Нэр *</label>
+          <input name="name" value="{{ spouse.name|default:'' }}" required autofocus>
+        </div>
+        <div class="fld">
+          <label>Хүйс</label>
+          <select name="gender">
+            <option value="f" {% if spouse.gender == 'f' %}selected{% endif %}>Эмэгтэй</option>
+            <option value="m" {% if spouse.gender == 'm' %}selected{% endif %}>Эрэгтэй</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fld">
+          <label>Төрсөн</label>
+          <input name="birth" value="{{ spouse.birth|default:'' }}" placeholder="1970.05.12">
+        </div>
+        <div class="fld">
+          <label>Өөд болсон</label>
+          <input name="death" value="{{ spouse.death|default:'' }}">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fld">
+          <label>Утас</label>
+          <input name="phone" value="{{ spouse.phone|default:'' }}" inputmode="tel" placeholder="9911xxxx">
+        </div>
+        <div class="fld">
+          <label>Сошиал хаяг</label>
+          <input name="social" value="{{ spouse.social|default:'' }}" placeholder="facebook.com/...">
+        </div>
+      </div>
+      <div class="fld">
+        <label>Гэрийн хаяг</label>
+        <input name="address" value="{{ spouse.address|default:'' }}">
+      </div>
+      <div class="fld">
+        <label>Намтар</label>
+        <textarea name="bio">{{ spouse.bio|default:'' }}</textarea>
+      </div>
+      <div class="fld">
+        <label>Хувийн зураг</label>
+        {% if spouse.photo %}
+          <img class="photo" src="{{ spouse.photo.url }}" alt="Зураг">
+          <label class="chk"><input type="checkbox" name="remove_photo" value="1"> Одоогийн зургийг устгах</label>
+        {% endif %}
+        <input type="file" name="photo" accept="image/*">
+      </div>
+
+      <div class="btns">
+        <button class="btn" type="submit">{% if spouse %}Хадгалах{% else %}Нэмэх{% endif %}</button>
+        <a class="cancel" href="{% url 'tree' %}">Болих</a>
+        {% if spouse %}
+          <button class="del" type="submit" name="delete" value="1"
+                  onclick="return confirm('Энэ ханийг устгах уу?')">Устгах</button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+{% include 'tree/_loader.html' %}
+</body>
+</html>

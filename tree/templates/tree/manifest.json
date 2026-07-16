@@ -1,0 +1,32 @@
+{% load static %}{
+  "name": "Халтарынхан · Ургийн мод",
+  "short_name": "Халтарынхан",
+  "description": "Халтарынхан овгийн ургийн мод",
+  "lang": "mn",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#122a5e",
+  "theme_color": "#122a5e",
+  "icons": [
+    {
+      "src": "{% static 'tree/icon-192.png' %}",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "{% static 'tree/icon-512.png' %}",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "{% static 'tree/icon-maskable-512.png' %}",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+{% include 'tree/_pwa.html' %}
+<title>{{ person.name }} · Халтарынхан</title>
+<style>
+  :root{ --navy:#122a5e; --navy-2:#1c3c7d; --navy-deep:#0a1c40; --gold:#d9b35c; --gold-2:#f0d28a;
+    --gold-deep:#a8842f; --cream:#f7f0df; --cream-2:#efe4c8; --paper:#fbf6ea; --ink:#2c2415;
+    --soft:#8a7c5c; --card:#fffdf6; --border:#e0d2ac; --line:#c9b489; --m:#1c3c7d; --m-soft:#e7ecf6;
+    --f:#9c3b52; --f-soft:#f6e8ec; }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif; color:var(--ink);
+    min-height:100vh; background-color:#ede0bf;
+    background-image:radial-gradient(1000px 460px at 50% -160px, rgba(18,42,94,.30), transparent 72%),
+      radial-gradient(circle at center, rgba(168,132,47,.10) 1px, transparent 1.6px);
+    background-size:auto,26px 26px; background-attachment:fixed; line-height:1.55; }
+  .util{ font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif; }
+
+  /* Top bar with back */
+  .topbar{ position:sticky; top:0; z-index:40; background:linear-gradient(180deg,var(--navy),var(--navy-deep));
+    border-bottom:2px solid var(--gold); }
+  .topbar-inner{ max-width:720px; margin:0 auto; display:flex; align-items:center; gap:12px; padding:12px 18px; }
+  .backbtn{ display:inline-flex; align-items:center; gap:7px; color:var(--gold-2); text-decoration:none;
+    font-family:'Trebuchet MS',sans-serif; font-size:14px; background:rgba(255,255,255,.08);
+    border:1px solid rgba(217,179,92,.5); border-radius:10px; padding:8px 13px; }
+  .backbtn:hover{ background:rgba(255,255,255,.16); }
+  .topbar b{ color:#fff; font-size:15px; letter-spacing:.5px; margin-left:auto; }
+
+  .wrap{ max-width:720px; margin:22px auto 40px; padding:0 18px; }
+
+  /* Hero header of the person */
+  .phead{ background:var(--card); border:1px solid var(--border); border-radius:18px;
+    box-shadow:0 14px 40px rgba(10,28,64,.14); padding:26px 24px; text-align:center; position:relative; overflow:hidden; }
+  .phead .avatar{ width:96px; height:96px; border-radius:50%; margin:0 auto 12px; display:grid; place-items:center;
+    color:#fff; font-weight:700; font-size:38px; border:3px solid var(--gold-2); box-shadow:0 4px 14px rgba(44,36,21,.22); }
+  .avatar.m{ background:linear-gradient(135deg,var(--navy-2),var(--navy)); }
+  .avatar.f{ background:linear-gradient(135deg,#b34a63,var(--f)); }
+  .avatar.ph{ background-size:cover !important; background-position:center !important; background-repeat:no-repeat !important; color:transparent !important; }
+  .clickimg{ cursor:zoom-in; }
+  .phead h1{ color:var(--navy-deep); font-size:27px; }
+  .phead .gen{ font-family:'Trebuchet MS',sans-serif; font-size:12.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--gold-deep); margin-top:6px; }
+  .phead .role{ color:var(--f); font-size:14px; margin-top:4px; }
+
+  .famphoto{ width:100%; max-width:520px; margin:16px auto 0; display:block; border-radius:14px;
+    border:1px solid var(--border); }
+
+  .sect{ background:var(--card); border:1px solid var(--border); border-radius:16px;
+    box-shadow:0 8px 26px rgba(10,28,64,.08); padding:20px 22px; margin-top:16px; }
+  .sect h3{ font-family:'Trebuchet MS',sans-serif; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold-deep); margin-bottom:12px; }
+
+  .frow{ display:flex; gap:12px; padding:9px 0; border-top:1px solid var(--cream-2); font-size:15px; }
+  .frow:first-of-type{ border-top:none; }
+  .frow .k{ flex:none; width:120px; color:var(--soft); font-family:'Trebuchet MS',sans-serif; font-size:13px; }
+  .frow .v{ flex:1; color:var(--ink); }
+  .frow .v a{ color:var(--navy-2); text-decoration:none; } .frow .v a:hover{ text-decoration:underline; }
+
+  .bio{ font-size:15.5px; line-height:1.8; color:var(--ink); white-space:pre-line; text-align:justify; }
+
+  /* spouse cards */
+  .spcard{ display:flex; gap:12px; background:var(--f-soft); border:1px solid #ebd4dc; border-radius:12px;
+    padding:12px; margin-bottom:10px; }
+  .spcard:last-child{ margin-bottom:0; }
+  .spphoto{ width:70px; height:70px; object-fit:cover; border-radius:10px; border:1px solid #e3c3cd; flex:none; }
+  .spava{ width:52px; height:52px; border-radius:50%; flex:none; display:grid; place-items:center; color:#fff;
+    font-weight:700; border:2px solid var(--gold-2); }
+  .spname{ font-weight:700; color:var(--navy-deep); font-size:16px; }
+  .spmeta{ font-family:'Trebuchet MS',sans-serif; font-size:13px; color:var(--soft); margin-top:4px; line-height:1.5; }
+  .spbio{ font-size:14px; color:var(--ink); margin-top:6px; line-height:1.55; }
+  .spedit{ display:inline-block; margin-top:7px; font-family:'Trebuchet MS',sans-serif; font-size:12.5px; color:var(--f); text-decoration:none; }
+  .spedit:hover{ text-decoration:underline; }
+
+  /* children chips */
+  .kids{ display:flex; flex-wrap:wrap; gap:9px; }
+  .kid{ display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--navy-deep);
+    background:var(--paper); border:1px solid var(--border); border-radius:999px; padding:6px 13px 6px 6px; font-size:14px; }
+  .kid:hover{ border-color:var(--gold); background:var(--cream); }
+  .kid .dot{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; color:#fff;
+    font-weight:700; font-size:12px; border:2px solid var(--gold-2); }
+  .dot.m{ background:linear-gradient(135deg,var(--navy-2),var(--navy)); }
+  .dot.f{ background:linear-gradient(135deg,#b34a63,var(--f)); }
+
+  /* action buttons */
+  .actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .abtn{ flex:1; min-width:150px; text-align:center; text-decoration:none; font-family:inherit; font-size:15px;
+    font-weight:700; border-radius:12px; padding:13px; border:1px solid var(--gold); cursor:pointer; }
+  .abtn.tree{ background:var(--card); color:var(--navy-deep); }
+  .abtn.edit{ background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:#fff; }
+  .abtn.add{ background:linear-gradient(135deg,var(--gold),var(--gold-deep)); color:var(--navy-deep); }
+  .abtn.spouse{ background:linear-gradient(135deg,#b34a63,var(--f)); color:#fff; }
+  .abtn:hover{ filter:brightness(1.06); }
+
+  /* ==== Зургийн цомог ==== */
+  .albumgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; }
+  .acell{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; cursor:pointer;
+    border:1px solid var(--border); background:#000; }
+  .acell img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .adel{ position:absolute; top:4px; right:4px; margin:0; }
+  .adel button{ width:26px; height:26px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(0,0,0,.55); color:#fff; font-size:13px; line-height:1; }
+  .adel button:hover{ background:rgba(200,40,40,.85); }
+  .albumempty{ color:var(--soft); font-size:13.5px; font-family:'Trebuchet MS',sans-serif; padding:4px 0; }
+  .albumprev{ display:block; text-decoration:none; }
+  .pcell{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
+    border:1px solid var(--border); background:#000; }
+  .pcell img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pcell.more{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    background:var(--navy); color:#fff; font-weight:800; font-size:22px; }
+  .pcell.more span{ font-size:11px; font-weight:600; opacity:.9; }
+  .uploadform{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; align-items:center; }
+  .uplabel{ position:relative; flex:1; min-width:180px; }
+  .uplabel input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .upfake{ display:block; text-align:center; border:1px dashed var(--line); border-radius:10px;
+    padding:11px; color:var(--gold-deep); font-size:14px; background:var(--paper);
+    font-family:'Trebuchet MS',sans-serif; }
+  .upbtn{ font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; color:#fff;
+    background:var(--navy); border:none; border-radius:10px; padding:11px 18px; }
+  .upbtn:hover{ filter:brightness(1.08); }
+
+  /* ==== Lightbox ==== */
+  .lb{ position:fixed; inset:0; z-index:100; background:rgba(8,10,16,.96); display:none;
+    flex-direction:column; touch-action:none; }
+  .lb.show{ display:flex; }
+  .lb-top{ display:flex; align-items:center; gap:8px; padding:12px 14px;
+    padding-top:calc(12px + env(safe-area-inset-top,0)); }
+  .lb-count{ color:#cbd2df; font-size:14px; }
+  .lb-btn{ cursor:pointer; color:#fff; background:rgba(255,255,255,.12); border:none;
+    width:42px; height:42px; border-radius:50%; font-size:18px; display:grid; place-items:center; }
+  .lb-btn.dl{ margin-left:auto; }
+  .lb-stage{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; }
+  .lb-stage img{ max-width:100%; max-height:100%; object-fit:contain; user-select:none; -webkit-user-drag:none;
+    transition:transform .15s ease; will-change:transform; }
+  .lb-stage img.zoom{ transition:none; }
+  .lb-nav{ position:absolute; top:50%; transform:translateY(-50%); width:50px; height:70px; border:none;
+    background:rgba(255,255,255,.10); color:#fff; font-size:26px; cursor:pointer; display:grid; place-items:center; }
+  .lb-prev{ left:8px; border-radius:0 12px 12px 0; } .lb-next{ right:8px; border-radius:12px 0 0 12px; }
+  .lb-cap{ text-align:center; color:#e6e9f0; font-size:14px; padding:14px;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom,0)); min-height:20px; }
+
+  /* ==== Минимал · мэргэжлийн override ==== */
+  :root{ --navy:#26324a; --navy-2:#3a4c6e; --navy-deep:#1c2536; --gold:#c0a24f; --gold-2:#d0b56f;
+    --gold-deep:#8f7330; --cream:#f3f4f6; --cream-2:#e9ebef; --paper:#ffffff; --ink:#1d2432;
+    --soft:#6f7787; --card:#ffffff; --border:#e5e8ed; --line:#e4e7ec;
+    --m:#3060a0; --m-soft:#eaf1fa; --f:#a04d64; --f-soft:#f6ecf0; }
+  body{ background-color:#f5f6f8 !important; background-image:none !important;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,Arial,sans-serif !important; }
+  h1,h2,h3{ font-family:inherit !important; letter-spacing:-.01em; }
+  .topbar{ background:var(--navy-deep) !important; border-bottom:1px solid rgba(192,162,79,.45) !important; }
+  .phead,.sect{ box-shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.05) !important; }
+  .abtn.edit,.abtn.spouse{ background:var(--navy) !important; color:#fff !important; }
+  .abtn.add{ background:var(--gold-deep) !important; color:#fff !important; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="backbtn" href="{% url 'tree' %}?focus={{ person.pk }}">← Буцах</a>
+    <b>Халтарынхан</b>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="phead">
+    {% if person.photo %}
+      <div class="avatar ph {{ person.gender }} clickimg" style="background-image:url('{{ person.photo.url }}')"
+           data-viewsingle="{{ person.photo.url }}" data-cap="{{ person.name }}" title="Томруулж харах"></div>
+    {% else %}
+      <div class="avatar {{ person.gender }}">{{ person.name|slice:':1' }}</div>
+    {% endif %}
+    <h1>{{ person.name }}</h1>
+    <div class="gen">{{ person.gen }}-р үе{% if person.gender == 'm' %} · Эрэгтэй{% else %} · Эмэгтэй{% endif %}</div>
+    {% if person.role %}<div class="role">{{ person.role }}</div>{% endif %}
+  </div>
+
+  <div class="sect">
+    <h3>Мэдээлэл</h3>
+    {% if person.birth %}<div class="frow"><div class="k">Төрсөн</div><div class="v">{{ person.birth }}</div></div>{% endif %}
+    {% if person.death %}<div class="frow"><div class="k">Өөд болсон</div><div class="v">{{ person.death }}</div></div>{% endif %}
+    {% if person.spouse %}<div class="frow"><div class="k">{% if person.gender == 'm' %}Эхнэр{% else %}Нөхөр{% endif %}</div><div class="v">{{ person.spouse }}</div></div>{% endif %}
+    {% if person.phone %}<div class="frow"><div class="k">Утас</div><div class="v"><a href="tel:{{ person.phone }}">{{ person.phone }}</a></div></div>{% endif %}
+    {% if person.social %}<div class="frow"><div class="k">Сошиал</div><div class="v">{{ person.social }}</div></div>{% endif %}
+    {% if person.address %}<div class="frow"><div class="k">Хаяг</div><div class="v">{{ person.address }}</div></div>{% endif %}
+    {% if person.parent %}<div class="frow"><div class="k">Эцэг/эх</div><div class="v"><a href="{% url 'person_detail' person.parent.pk %}">{{ person.parent.name }}</a></div></div>{% endif %}
+    {% if children %}<div class="frow"><div class="k">Үр хүүхэд</div><div class="v">{{ children|length }} хүүхэд · нийт {{ descendants_count }} үр удам</div></div>{% endif %}
+  </div>
+
+  {% if person.bio %}
+    <div class="sect">
+      <h3>Намтар</h3>
+      <div class="bio">{{ person.bio }}</div>
+    </div>
+  {% endif %}
+
+  {% if album or can_edit %}
+    <div class="sect">
+      <h3>📷 Зургийн цомог{% if album %} ({{ album|length }}){% endif %}</h3>
+      {% if album %}
+        {% if album|length > 9 %}
+          {# 9-өөс дээш бол хураангуйлж, дарвал бүх зургийн хуудас руу #}
+          <a class="albumprev" href="{% url 'person_album' person.pk %}">
+            <div class="albumgrid">
+              {% for p in album|slice:":8" %}
+                <div class="pcell"><img src="{{ p.image.url }}" loading="lazy" alt=""></div>
+              {% endfor %}
+              <div class="pcell more">+{{ album|length|add:"-8" }}<span>Бүгдийг харах</span></div>
+            </div>
+          </a>
+        {% else %}
+          <div class="albumgrid">
+            {% for p in album %}
+              <div class="acell" data-i="{{ forloop.counter0 }}">
+                <img src="{{ p.image.url }}" loading="lazy" alt="{{ p.caption }}">
+                {% if can_edit %}
+                  <form class="adel" method="post" action="{% url 'delete_photo' p.pk %}"
+                        data-loader="Устгаж байна…" onsubmit="return confirm('Энэ зургийг устгах уу?')">{% csrf_token %}
+                    <button type="submit" title="Устгах">✕</button>
+                  </form>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="albumempty">Одоогоор зураг нэмээгүй байна.</div>
+      {% endif %}
+      {% if can_edit %}
+        <form class="uploadform" method="post" enctype="multipart/form-data"
+              action="{% url 'add_photos' person.pk %}" data-loader="Зураг оруулж байна…">
+          {% csrf_token %}
+          <label class="uplabel">
+            <input type="file" name="photos" accept="image/*" multiple required
+                   onchange="this.form.querySelector('.upbtn').textContent='➕ '+this.files.length+' зураг нэмэх'">
+            <span class="upfake">🖼️ Зураг сонгох (олноор)</span>
+          </label>
+          <button class="upbtn" type="submit">➕ Зураг нэмэх</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if spouses %}
+    <div class="sect">
+      <h3>{% if person.gender == 'm' %}Эхнэр{% else %}Нөхөр{% endif %} / Хань</h3>
+      {% for sp in spouses %}
+        <div class="spcard">
+          {% if sp.photo %}
+            <img class="spphoto clickimg" src="{{ sp.photo.url }}" alt="" data-viewsingle="{{ sp.photo.url }}" data-cap="{{ sp.name }}">
+          {% else %}
+            <div class="spava {{ sp.gender }}">{{ sp.name|slice:':1' }}</div>
+          {% endif %}
+          <div>
+            <div class="spname">{{ sp.name }}</div>
+            <div class="spmeta">
+              {% if sp.birth %}Төрсөн: {{ sp.birth }}{% endif %}
+              {% if sp.death %} · Өөд болсон: {{ sp.death }}{% endif %}
+              {% if sp.phone %} · ☎ {{ sp.phone }}{% endif %}
+              {% if sp.address %} · 🏠 {{ sp.address }}{% endif %}
+              {% if sp.social %} · {{ sp.social }}{% endif %}
+            </div>
+            {% if sp.bio %}<div class="spbio">{{ sp.bio }}</div>{% endif %}
+            {% if can_edit %}<a class="spedit" href="{% url 'edit_spouse' sp.pk %}">✏️ засах</a>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if children %}
+    <div class="sect">
+      <h3>Үр хүүхэд ({{ children|length }})</h3>
+      <div class="kids">
+        {% for c in children %}
+          <a class="kid" href="{% url 'person_detail' c.pk %}">
+            <span class="dot {{ c.gender }}">{{ c.name|slice:':1' }}</span>
+            {{ c.name }}{% if c.birth %} · {{ c.birth|slice:':4' }}{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="actions">
+    <a class="abtn tree" href="{% url 'tree' %}?focus={{ person.pk }}">🌳 Модон дээр харах</a>
+    {% if can_edit %}
+      <a class="abtn edit" href="{% url 'edit_person' person.pk %}">✏️ Засах</a>
+      <a class="abtn add" href="{% url 'add_child' person.pk %}">➕ Хүүхэд нэмэх</a>
+      <a class="abtn spouse" href="{% url 'add_spouse' person.pk %}">💍 Хань нэмэх</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Lightbox (цомгийн зураг) -->
+<div class="lb" id="lb" aria-hidden="true">
+  <div class="lb-top">
+    <button class="lb-btn" id="lbClose" title="Хаах">✕</button>
+    <span class="lb-count" id="lbCount"></span>
+    <button class="lb-btn dl" id="lbDownload" title="Татах">⬇</button>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Өмнөх">‹</button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Дараах">›</button>
+  </div>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+const ALBUM = {{ album_json|safe }};
+const lb = document.getElementById('lb'), stage = document.getElementById('lbStage'),
+      capEl = document.getElementById('lbCap'), countEl = document.getElementById('lbCount'),
+      prevBtn = document.getElementById('lbPrev'), nextBtn = document.getElementById('lbNext');
+let cur = 0, zoomed = false, viewList = ALBUM;
+function render(){
+  stage.querySelectorAll('img').forEach(el => el.remove());
+  const m = viewList[cur];
+  const img = document.createElement('img');
+  img.src = m.url; img.alt = m.caption || '';
+  zoomed = false;
+  stage.appendChild(img);
+  capEl.textContent = m.caption || '';
+  countEl.textContent = (cur+1) + ' / ' + viewList.length;
+  const multi = viewList.length > 1;
+  prevBtn.style.display = nextBtn.style.display = multi ? 'grid' : 'none';
+}
+const dlBtn = document.getElementById('lbDownload');
+function open(i){ viewList = ALBUM; cur=i; dlBtn.style.display='';   // цомгийн зургийг татаж болно
+  lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden'; render(); }
+// Нэг зургийг (profile, гэр бүл, хань) томруулж харах — татах товчгүй
+function openSingle(url, cap){ viewList = [{url:url, caption:cap||''}]; cur=0; dlBtn.style.display='none';
+  lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden'; render(); }
+function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true');
+  document.body.style.overflow=''; stage.querySelectorAll('img').forEach(el=>el.remove()); }
+function go(d){ if(zoomed) return; cur=(cur+d+viewList.length)%viewList.length; render(); }
+async function download(){
+  const m = viewList[cur];
+  const ext = (m.url.split('?')[0].split('.').pop() || 'jpg').slice(0,4).toLowerCase();
+  const name = 'haltarynkhan-'+(cur+1)+'.'+ext;
+  let blob;
+  try{ blob = await (await fetch(m.url, {mode:'cors'})).blob(); }
+  catch(e){ window.open(m.url,'_blank','noopener'); return; }
+  const file = new File([blob], name, {type: blob.type || 'image/jpeg'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file]}); return; }
+    catch(err){ if(err && err.name==='AbortError') return; }
+  }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+document.querySelectorAll('.acell').forEach(c =>
+  c.addEventListener('click', e => { if(e.target.closest('.adel')) return; open(+c.dataset.i); }));
+// Profile / гэр бүл / ханийн зураг дээр дарж томруулах
+document.querySelectorAll('[data-viewsingle]').forEach(el =>
+  el.addEventListener('click', () => openSingle(el.dataset.viewsingle, el.dataset.cap || '')));
+document.getElementById('lbClose').onclick = close;
+prevBtn.onclick = () => go(-1); nextBtn.onclick = () => go(1);
+document.getElementById('lbDownload').onclick = download;
+lb.addEventListener('click', e => { if(e.target===lb || e.target===stage) close(); });
+document.addEventListener('keydown', e => {
+  if(!lb.classList.contains('show')) return;
+  if(e.key==='Escape') close(); else if(e.key==='ArrowLeft') go(-1); else if(e.key==='ArrowRight') go(1);
+});
+let sx=0, sy=0;
+stage.addEventListener('touchstart', e => { if(e.touches.length===1){ sx=e.touches[0].clientX; sy=e.touches[0].clientY; } }, {passive:true});
+stage.addEventListener('touchend', e => {
+  if(zoomed) return;
+  const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)) go(dx<0?1:-1);
+}, {passive:true});
+</script>
+{% include 'tree/_loader.html' %}
+</body>
+</html>

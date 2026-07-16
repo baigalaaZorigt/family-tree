@@ -1,0 +1,14 @@
+venv/
+db.sqlite3
+__pycache__/
+*.pyc
+media/
+staticfiles/
+build/
+.git/
+.gitignore
+*.md
+haltarynkhan-tree-combined.html
+qr-family-tree.png
+certbot/
+.env

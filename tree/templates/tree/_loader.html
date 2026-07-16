@@ -1,0 +1,50 @@
+<style>
+  .ldr-overlay{ position:fixed; inset:0; z-index:9999; background:rgba(245,246,248,.72);
+    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+    display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+  .ldr-overlay.show{ display:flex; }
+  .ldr-spin{ width:52px; height:52px; border-radius:50%;
+    border:5px solid rgba(38,50,74,.16); border-top-color:#26324a;
+    animation:ldrspin .8s linear infinite; }
+  @keyframes ldrspin{ to{ transform:rotate(360deg); } }
+  .ldr-text{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    color:#26324a; font-size:14px; font-weight:600; }
+  /* Хуудас бүрийн буцах товч */
+  .pageback{ display:inline-flex; align-items:center; gap:6px; margin-bottom:14px;
+    color:#3a4c6e; text-decoration:none; font-size:14px; font-weight:600;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    background:#fff; border:1px solid #e5e8ed; border-radius:10px; padding:8px 13px; }
+  .pageback:hover{ background:#f0f2f5; }
+</style>
+<div class="ldr-overlay" id="ldrOverlay" aria-hidden="true">
+  <div class="ldr-spin"></div>
+  <div class="ldr-text" id="ldrText">Түр хүлээнэ үү…</div>
+</div>
+<script>
+(function(){
+  const ov = document.getElementById('ldrOverlay'), txt = document.getElementById('ldrText');
+  function show(msg){ if(msg) txt.textContent = msg; ov.classList.add('show'); }
+  function hide(){ ov.classList.remove('show'); }
+  window.__showLoader = show;
+  window.__hideLoader = hide;
+  // Форм илгээх үед (засвар, зураг оруулах, нэвтрэх г.м.) — удаан үед spinner
+  document.addEventListener('submit', function(e){
+    const f = e.target;
+    if(f.hasAttribute('data-noloader')) return;
+    show(f.getAttribute('data-loader') || 'Түр хүлээнэ үү…');
+  }, true);
+  // Дотоод хуудас руу шилжих холбоос дарахад
+  document.addEventListener('click', function(e){
+    const a = e.target.closest('a');
+    if(!a) return;
+    const href = a.getAttribute('href') || '';
+    if(a.target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-noloader')) return;
+    if(!href || href.charAt(0) === '#' || href.toLowerCase().startsWith('javascript:')) return;
+    if(/^(tel:|mailto:)/i.test(href)) return;
+    if(/^https?:\/\//i.test(href) && href.indexOf(location.origin) !== 0) return; // гадаад линк
+    show('Ачааллаж байна…');
+  }, true);
+  // Буцаж ирэхэд (bfcache) далдлана
+  window.addEventListener('pageshow', hide);
+})();
+</script>

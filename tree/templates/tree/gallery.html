@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>{{ event.display_title }} · Зураг, видео</title>
+<style>
+  :root{ --navy:#26324a; --navy-2:#3a4c6e; --navy-deep:#1c2536; --gold:#c0a24f; --gold-2:#d0b56f;
+    --gold-deep:#8f7330; --cream:#f3f4f6; --paper:#ffffff; --ink:#1d2432; --soft:#6f7787;
+    --card:#ffffff; --border:#e5e8ed; }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,Arial,sans-serif;
+    color:var(--ink); background:#f5f6f8; min-height:100vh; }
+
+  .topbar{ position:sticky; top:0; z-index:40; background:var(--navy-deep);
+    border-bottom:1px solid rgba(192,162,79,.45); }
+  .topbar-inner{ max-width:900px; margin:0 auto; display:flex; align-items:center; gap:12px; padding:12px 18px; }
+  .backbtn{ display:inline-flex; align-items:center; gap:7px; color:var(--gold-2); text-decoration:none;
+    font-size:14px; background:rgba(255,255,255,.08); border:1px solid rgba(217,179,92,.5);
+    border-radius:10px; padding:8px 13px; }
+  .backbtn:hover{ background:rgba(255,255,255,.16); }
+  .topbar b{ color:#fff; font-size:15px; margin-left:auto; }
+
+  .wrap{ max-width:900px; margin:20px auto 40px; padding:0 16px; }
+  .ehead{ display:flex; gap:12px; align-items:center; }
+  .eico{ font-size:30px; flex:none; width:54px; height:54px; display:grid; place-items:center;
+    background:var(--cream); border-radius:14px; }
+  h1{ color:var(--navy-deep); font-size:22px; }
+  .edate{ font-size:13px; color:var(--soft); margin-top:3px; }
+  .edesc{ color:var(--ink); font-size:15px; line-height:1.6; margin-top:12px; }
+  .count{ font-size:13px; color:var(--soft); margin:18px 2px 10px; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
+  .cell{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; cursor:pointer;
+    border:1px solid var(--border); background:#000; }
+  .cell img, .cell video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .cell .play{ position:absolute; inset:0; display:grid; place-items:center; color:#fff;
+    font-size:34px; text-shadow:0 2px 8px rgba(0,0,0,.6); background:rgba(0,0,0,.15); pointer-events:none; }
+  .empty{ text-align:center; padding:50px 20px; color:var(--soft); }
+  .empty .big{ font-size:44px; margin-bottom:10px; }
+
+  /* ===== Lightbox ===== */
+  .lb{ position:fixed; inset:0; z-index:100; background:rgba(8,10,16,.96); display:none;
+    flex-direction:column; touch-action:none; }
+  .lb.show{ display:flex; }
+  .lb-top{ display:flex; align-items:center; gap:8px; padding:12px 14px;
+    padding-top:calc(12px + env(safe-area-inset-top,0)); }
+  .lb-count{ color:#cbd2df; font-size:14px; }
+  .lb-btn{ cursor:pointer; color:#fff; background:rgba(255,255,255,.12); border:none;
+    width:42px; height:42px; border-radius:50%; font-size:18px; display:grid; place-items:center; }
+  .lb-btn:hover{ background:rgba(255,255,255,.22); }
+  .lb-btn.dl{ margin-left:auto; }
+  .lb-stage{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; }
+  .lb-stage img{ max-width:100%; max-height:100%; object-fit:contain; user-select:none;
+    -webkit-user-drag:none; transition:transform .15s ease; will-change:transform; }
+  .lb-stage img.zoom{ transition:none; cursor:grab; }
+  .lb-stage video{ max-width:100%; max-height:100%; }
+  .lb-nav{ position:absolute; top:50%; transform:translateY(-50%); width:50px; height:70px;
+    border:none; background:rgba(255,255,255,.10); color:#fff; font-size:26px; cursor:pointer;
+    display:grid; place-items:center; }
+  .lb-nav:hover{ background:rgba(255,255,255,.20); }
+  .lb-prev{ left:8px; border-radius:0 12px 12px 0; }
+  .lb-next{ right:8px; border-radius:12px 0 0 12px; }
+  .lb-cap{ text-align:center; color:#e6e9f0; font-size:14px; padding:14px;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom,0)); min-height:20px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="backbtn" href="{% url 'tree' %}?tab=bayar">← Буцах</a>
+    <b>Халтарынхан</b>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="ehead">
+    <span class="eico">{{ event.icon }}</span>
+    <div>
+      <h1>{{ event.display_title }}</h1>
+      {% if event.date %}<div class="edate">{{ event.date }}</div>{% endif %}
+    </div>
+  </div>
+  {% if event.description %}<p class="edesc">{{ event.description }}</p>{% endif %}
+
+  {% if media %}
+    <div class="count">{{ media|length }} зураг / видео · дарж томруулна</div>
+    <div class="grid">
+      {% for m in media %}
+        <div class="cell" data-i="{{ forloop.counter0 }}">
+          {% if m.media_type == 'video' %}
+            {% if m.thumbnail_url %}<img src="{{ m.thumbnail_url }}" loading="lazy" alt="">
+            {% else %}<video src="{{ m.url }}#t=0.1" preload="metadata" muted></video>{% endif %}
+            <div class="play">▶</div>
+          {% else %}
+            <img src="{{ m.url }}" loading="lazy" alt="{{ m.caption }}">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">
+      <div class="big">📷</div>
+      <div>Энэ баярын зураг хараахан ороогүй байна.</div>
+      <div style="font-size:12.5px;margin-top:8px;opacity:.85">Зураг, видеогоо оруулахыг хүсвэл админд хандана уу.</div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Lightbox -->
+<div class="lb" id="lb" aria-hidden="true">
+  <div class="lb-top">
+    <button class="lb-btn" id="lbClose" title="Хаах">✕</button>
+    <span class="lb-count" id="lbCount"></span>
+    <button class="lb-btn dl" id="lbDownload" title="Татах">⬇</button>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Өмнөх">‹</button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Дараах">›</button>
+  </div>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+const MEDIA = {{ media_json|safe }};
+const lb = document.getElementById('lb'), stage = document.getElementById('lbStage'),
+      capEl = document.getElementById('lbCap'), countEl = document.getElementById('lbCount'),
+      prevBtn = document.getElementById('lbPrev'), nextBtn = document.getElementById('lbNext');
+let cur = 0, zoomed = false;
+
+function render(){
+  // хуучин зураг/видеог арилгах (nav товчнуудыг үлдээнэ)
+  stage.querySelectorAll('img,video').forEach(el => el.remove());
+  const m = MEDIA[cur];
+  let el;
+  if(m.type === 'video'){
+    el = document.createElement('video');
+    el.src = m.url; el.controls = true; el.autoplay = true; el.playsInline = true;
+  } else {
+    el = document.createElement('img');
+    el.src = m.url; el.alt = m.caption || '';
+    el.addEventListener('dblclick', toggleZoom);
+  }
+  zoomed = false;
+  stage.appendChild(el);
+  capEl.textContent = m.caption || '';
+  countEl.textContent = (cur+1) + ' / ' + MEDIA.length;
+  const multi = MEDIA.length > 1;
+  prevBtn.style.display = nextBtn.style.display = multi ? 'grid' : 'none';
+}
+function open(i){ cur = i; lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden'; render(); }
+function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true');
+  document.body.style.overflow=''; stage.querySelectorAll('img,video').forEach(el=>el.remove()); }
+function go(d){ if(zoomed) return; cur = (cur + d + MEDIA.length) % MEDIA.length; render(); }
+
+function toggleZoom(e){
+  const img = e.currentTarget;
+  zoomed = !zoomed;
+  if(zoomed){ img.classList.add('zoom'); img.style.transform = 'scale(2.2)'; }
+  else { img.classList.remove('zoom'); img.style.transform = ''; }
+}
+
+// Татах / хадгалах — утсан дээр зургийн галерей (Photos) руу, компьютерт Downloads руу
+async function download(){
+  const m = MEDIA[cur];
+  const ext = (m.url.split('?')[0].split('.').pop() || '').slice(0,4).toLowerCase();
+  const name = 'haltarynkhan-' + (cur+1) + (ext ? '.'+ext : (m.type==='video'?'.mp4':'.jpg'));
+  let blob;
+  try{
+    const res = await fetch(m.url, {mode:'cors'});
+    blob = await res.blob();
+  }catch(err){
+    // CORS зөвшөөрөгдөөгүй — шинэ таб-д нээж, гараар хадгалуулна
+    window.open(m.url, '_blank', 'noopener');
+    return;
+  }
+  const file = new File([blob], name, { type: blob.type || (m.type==='video'?'video/mp4':'image/jpeg') });
+
+  // Утас: Web Share → «Зураг хадгалах» сонголтоор Photos галерей руу орно
+  if(navigator.canShare && navigator.canShare({ files:[file] })){
+    try{ await navigator.share({ files:[file] }); return; }
+    catch(err){ if(err && err.name === 'AbortError') return; /* цуцалсан бол зогсоно */ }
+  }
+  // Компьютер / fallback: шууд татах (Downloads)
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+
+// Grid → lightbox нээх
+document.querySelectorAll('.cell').forEach(c =>
+  c.addEventListener('click', () => open(+c.dataset.i)));
+
+document.getElementById('lbClose').onclick = close;
+prevBtn.onclick = () => go(-1);
+nextBtn.onclick = () => go(1);
+document.getElementById('lbDownload').onclick = download;
+lb.addEventListener('click', e => { if(e.target === lb || e.target === stage) close(); });
+document.addEventListener('keydown', e => {
+  if(!lb.classList.contains('show')) return;
+  if(e.key === 'Escape') close();
+  else if(e.key === 'ArrowLeft') go(-1);
+  else if(e.key === 'ArrowRight') go(1);
+});
+
+// Хос тал руу шудрах (swipe) — 2 тал
+let sx = 0, sy = 0;
+stage.addEventListener('touchstart', e => { if(e.touches.length===1){ sx=e.touches[0].clientX; sy=e.touches[0].clientY; } }, {passive:true});
+stage.addEventListener('touchend', e => {
+  if(zoomed) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+}, {passive:true});
+</script>
+{% include 'tree/_loader.html' %}
+</body>
+</html>
