@@ -33,6 +33,8 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = _env_list('ALLOWED_HOSTS', '*') or ['*']
 
 CSRF_TRUSTED_ORIGINS = _env_list('CSRF_TRUSTED_ORIGINS') or [
+    'https://haltariinhan.aidolab.mn',
+    'https://www.haltariinhan.aidolab.mn',
     'http://192.168.1.40:8000',
     'http://localhost:8000',
     'http://127.0.0.1:8000',

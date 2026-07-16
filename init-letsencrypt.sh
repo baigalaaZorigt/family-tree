@@ -18,7 +18,11 @@ DATA_PATH="./certbot"
 RSA_KEY_SIZE=4096
 STAGING=${STAGING:-0}   # 1 бол туршилтын (staging) сертификат
 
-domains="$DOMAIN www.$DOMAIN"
+# www. дэд домэйн DNS-д зааагүй бол Let's Encrypt баталгаажуулалт бүхэлдээ бүтэлгүйтдэг тул
+# зөвхөн бодитоор resolve хийж буй домэйнүүдийг сертификатад оруулна. www-г нэмэхийг
+# хүсвэл эхлээд DNS A бичлэгээ нэмээд WWW=1 ./init-letsencrypt.sh гэж ажиллуул.
+domains="$DOMAIN"
+if [ "$WWW" = "1" ]; then domains="$domains www.$DOMAIN"; fi
 echo "### Домэйн: $domains"
 
 # 1) Түр (dummy) сертификат үүсгэх — nginx эхлэхийн тулд

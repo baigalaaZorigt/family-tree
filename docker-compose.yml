@@ -39,15 +39,16 @@ services:
       DOMAIN: ${DOMAIN}
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/custom-entrypoint.sh:/custom-entrypoint.sh:ro
       - static_volume:/app/staticfiles:ro
       - ./media:/app/media:ro
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
     depends_on:
       - web
-    # 6 цаг тутам reload (шинэчилсэн SSL сертификатыг авахаар)
-    command: >
-      /bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'
+    # Жагсаалт хэлбэр (list form) — compose YAML-ийн $$-escaping мөргөлдөөнөөс сэргийлнэ.
+    # Скрипт нь app.conf.template-г envsubst-оор бодит DOMAIN-той болгоод nginx эхлүүлнэ.
+    command: ["/bin/sh", "/custom-entrypoint.sh"]
 
   certbot:
     image: certbot/certbot
