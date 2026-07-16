@@ -1,0 +1,265 @@
+<!-- Хуваалцсан lightbox (gallery.html, album.html хоёулаа ашиглана).
+     Ашиглах: include-оос ӨМНӨ `const LIGHTBOX_ITEMS = [...]` глобал массивыг
+     тодорхойлно. Item бүр: {url, caption, type?, poster?} — type=='video' болон
+     poster (thumbnail→бүтэн зураг shuurhai солих) заавал биш. Grid-ийн эсийг
+     дарахад `open(index)` функцийг дуудна (доор глобал болгож тодорхойлсон). -->
+<style>
+  .lb-spin{ position:absolute; width:44px; height:44px; border-radius:50%;
+    border:4px solid rgba(255,255,255,.2); border-top-color:#fff; animation:lbspin .8s linear infinite; display:none; }
+  .lb-spin.show{ display:block; }
+  @keyframes lbspin{ to{ transform:rotate(360deg); } }
+
+  .lb{ position:fixed; inset:0; z-index:100; background:rgba(8,10,16,.96); display:none;
+    flex-direction:column; touch-action:none; }
+  .lb.show{ display:flex; }
+  .lb-top{ display:flex; align-items:center; gap:8px; padding:12px 14px;
+    padding-top:calc(12px + env(safe-area-inset-top,0)); }
+  .lb-count{ color:#cbd2df; font-size:14px; }
+  .lb-btn{ cursor:pointer; color:#fff; background:rgba(255,255,255,.12); border:none;
+    width:42px; height:42px; border-radius:50%; font-size:18px; display:grid; place-items:center; }
+  .lb-btn:hover{ background:rgba(255,255,255,.22); }
+  .lb-btn.dl{ margin-left:auto; }
+  .lb-stage{ flex:1; position:relative; overflow:hidden; display:grid; place-items:center; touch-action:none; }
+  .lb-stage img{ max-width:100%; max-height:100%; object-fit:contain; user-select:none;
+    -webkit-user-drag:none; will-change:transform; cursor:zoom-in; touch-action:none; }
+  .lb-stage video{ max-width:100%; max-height:100%; }
+  .lb-nav{ position:absolute; top:50%; transform:translateY(-50%); width:50px; height:70px;
+    border:none; background:rgba(255,255,255,.10); color:#fff; font-size:26px; cursor:pointer;
+    display:grid; place-items:center; }
+  .lb-nav:hover{ background:rgba(255,255,255,.20); }
+  .lb-prev{ left:8px; border-radius:0 12px 12px 0; }
+  .lb-next{ right:8px; border-radius:12px 0 0 12px; }
+  .lb-cap{ text-align:center; color:#e6e9f0; font-size:14px; padding:14px;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom,0)); min-height:20px; }
+</style>
+
+<div class="lb" id="lb" aria-hidden="true">
+  <div class="lb-top">
+    <button class="lb-btn" id="lbClose" title="Хаах">✕</button>
+    <span class="lb-count" id="lbCount"></span>
+    <button class="lb-btn dl" id="lbDownload" title="Татах">⬇</button>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <div class="lb-spin" id="lbSpin"></div>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Өмнөх">‹</button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Дараах">›</button>
+  </div>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+(function(){
+  const ITEMS = window.LIGHTBOX_ITEMS || [];
+  const lb = document.getElementById('lb'), stage = document.getElementById('lbStage'),
+        capEl = document.getElementById('lbCap'), countEl = document.getElementById('lbCount'),
+        prevBtn = document.getElementById('lbPrev'), nextBtn = document.getElementById('lbNext'),
+        spinEl = document.getElementById('lbSpin');
+  let cur = 0, curImg = null;
+
+  /* ---- Zoom/pan төлөв (томруулах · чирж харах) ---- */
+  const MAX_ZOOM = 4;
+  let zScale = 1, zTx = 0, zTy = 0;
+  function applyZoom(animate){
+    if(!curImg) return;
+    curImg.style.transition = animate ? 'transform .18s ease' : 'none';
+    curImg.style.transform = `translate(${zTx}px, ${zTy}px) scale(${zScale})`;
+  }
+  function resetZoom(animate){ zScale = 1; zTx = 0; zTy = 0; applyZoom(animate); }
+  function zoomBy(factor, ox, oy){
+    const next = Math.min(MAX_ZOOM, Math.max(1, zScale * factor));
+    const ratio = next / zScale;
+    zTx = ox + (zTx - ox) * ratio;
+    zTy = oy + (zTy - oy) * ratio;
+    zScale = next;
+    if(zScale <= 1.02){ resetZoom(true); return; }
+    applyZoom(false);
+  }
+  function toggleTapZoom(clientX, clientY){
+    if(!curImg) return;
+    const r = stage.getBoundingClientRect();
+    const ox = clientX - r.left - r.width/2, oy = clientY - r.top - r.height/2;
+    if(zScale > 1) resetZoom(true);
+    else zoomBy(2.6, ox, oy);
+  }
+
+  function render(){
+    // хуучин зураг/видеог арилгах (nav товч, spinner-г үлдээнэ)
+    stage.querySelectorAll('img,video').forEach(el => el.remove());
+    curImg = null;
+    const m = ITEMS[cur];
+    let el;
+    if(m.type === 'video'){
+      el = document.createElement('video');
+      el.src = m.url; el.controls = true; el.autoplay = true; el.playsInline = true;
+      spinEl.classList.remove('show');
+    } else {
+      el = document.createElement('img');
+      // эхлээд жижиг thumbnail-аар шуурхай харуулж, бүтэн зургийг арын дэвсгэрт ачаална
+      el.src = m.poster || m.url;
+      el.alt = m.caption || '';
+      curImg = el;
+      if(m.poster && m.poster !== m.url){
+        spinEl.classList.add('show');
+        const full = new Image();
+        full.onload = () => { el.src = m.url; spinEl.classList.remove('show'); };
+        full.onerror = () => spinEl.classList.remove('show');
+        full.src = m.url;
+      } else {
+        spinEl.classList.remove('show');
+      }
+    }
+    zScale = 1; zTx = 0; zTy = 0;
+    stage.appendChild(el);
+    capEl.textContent = m.caption || '';
+    countEl.textContent = (cur+1) + ' / ' + ITEMS.length;
+    const multi = ITEMS.length > 1;
+    prevBtn.style.display = nextBtn.style.display = multi ? 'grid' : 'none';
+  }
+  function open(i){ cur = i; lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden'; render(); }
+  function close(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true');
+    document.body.style.overflow=''; stage.querySelectorAll('img,video').forEach(el=>el.remove()); curImg=null; }
+  function go(d){ if(zScale > 1) return; cur = (cur + d + ITEMS.length) % ITEMS.length; render(); }
+
+  /* ---- Хулгана/хурууны pointer events: pinch-zoom · чирж харах (pan) · шудрах ---- */
+  const pointers = new Map();
+  let pinchStartDist = 0, pinchStartScale = 1;
+  let dragStartX = 0, dragStartY = 0, dragStartTx = 0, dragStartTy = 0, dragging = false;
+  let lastTapTime = 0, lastTapX = 0, lastTapY = 0;
+  let wasPinch = false;  // энэ дохио pinch (2 хуруу) агуулсан эсэх — pinch-ийн дараах "swipe" алдаанаас сэргийлнэ
+
+  function ptDist(a, b){ return Math.hypot(a.x - b.x, a.y - b.y); }
+  function ptMid(a, b){ return { x: (a.x+b.x)/2, y: (a.y+b.y)/2 }; }
+
+  stage.addEventListener('pointerdown', e => {
+    if(!curImg) return;
+    // Зөвхөн зурган дээр л (эсвэл аль хэдийн 2 хуруу pinch хийж байх үед) чирэх/зумдах эхэлнэ
+    if(e.target !== curImg && pointers.size === 0) return;
+    stage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if(pointers.size === 2){
+      const [a, b] = [...pointers.values()];
+      pinchStartDist = ptDist(a, b);
+      pinchStartScale = zScale;
+      dragging = false;
+      wasPinch = true;
+    } else if(pointers.size === 1){
+      dragStartX = e.clientX; dragStartY = e.clientY;
+      dragStartTx = zTx; dragStartTy = zTy;
+      dragging = true;
+    }
+  });
+  stage.addEventListener('pointermove', e => {
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if(pointers.size === 2){
+      const [a, b] = [...pointers.values()];
+      const dist = ptDist(a, b);
+      if(pinchStartDist > 0){
+        const r = stage.getBoundingClientRect();
+        const mid = ptMid(a, b);
+        const ox = mid.x - r.left - r.width/2, oy = mid.y - r.top - r.height/2;
+        const next = Math.min(MAX_ZOOM, Math.max(1, pinchStartScale * (dist / pinchStartDist)));
+        const ratio = next / zScale;
+        zTx = ox + (zTx - ox) * ratio; zTy = oy + (zTy - oy) * ratio;
+        zScale = next;
+        applyZoom(false);
+      }
+    } else if(pointers.size === 1 && dragging){
+      const dx = e.clientX - dragStartX, dy = e.clientY - dragStartY;
+      if(zScale > 1){
+        zTx = dragStartTx + dx; zTy = dragStartTy + dy;
+        applyZoom(false);
+      }
+    }
+  });
+  function endPointer(e){
+    // pinch (2 хуруу) орсон дохио бол swipe/tap-г огт шалгахгүй — санамсаргүй "дараагийн зураг" үсрэлтээс сэргийлнэ
+    if(pointers.size === 1 && zScale <= 1 && dragging && !wasPinch){
+      const p = pointers.get(e.pointerId);
+      if(p){
+        const dx = p.x - dragStartX, dy = p.y - dragStartY;
+        if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)){ go(dx < 0 ? 1 : -1); }
+        else {
+          // Хурдан 2 товшилт → тухайн цэг рүү томруулна (double-tap)
+          const now = Date.now();
+          if(now - lastTapTime < 320 && Math.hypot(p.x - lastTapX, p.y - lastTapY) < 30){
+            toggleTapZoom(p.x, p.y); lastTapTime = 0;
+          } else { lastTapTime = now; lastTapX = p.x; lastTapY = p.y; }
+        }
+      }
+    }
+    pointers.delete(e.pointerId);
+    if(pointers.size === 1){
+      // pinch-ийн нэг хуруу гарсан бол үлдсэн хурууны ОДООГИЙН байрлалаас дахин чирэлт эхлүүлнэ
+      const [remaining] = [...pointers.values()];
+      dragStartX = remaining.x; dragStartY = remaining.y;
+      dragStartTx = zTx; dragStartTy = zTy;
+      dragging = true;
+    } else {
+      dragging = false;
+    }
+    if(pointers.size < 2) pinchStartDist = 0;
+    if(pointers.size === 0) wasPinch = false;
+    if(zScale <= 1.02) resetZoom(false);
+  }
+  stage.addEventListener('pointerup', endPointer);
+  stage.addEventListener('pointercancel', endPointer);
+
+  // Компьютер: хулганы дугуйгаар zoom (cursor цэгийг тойрч)
+  stage.addEventListener('wheel', e => {
+    if(!curImg) return;
+    e.preventDefault();
+    const r = stage.getBoundingClientRect();
+    const ox = e.clientX - r.left - r.width/2, oy = e.clientY - r.top - r.height/2;
+    zoomBy(e.deltaY < 0 ? 1.18 : 0.85, ox, oy);
+  }, { passive:false });
+
+  // Компьютер: давхар товших (dblclick) → томруулах/буцаах
+  stage.addEventListener('dblclick', e => toggleTapZoom(e.clientX, e.clientY));
+
+  // Татах / хадгалах — утсан дээр зургийн галерей (Photos) руу, компьютерт Downloads руу
+  async function download(){
+    const m = ITEMS[cur];
+    const ext = (m.url.split('?')[0].split('.').pop() || '').slice(0,4).toLowerCase();
+    const name = 'haltarynkhan-' + (cur+1) + (ext ? '.'+ext : (m.type==='video'?'.mp4':'.jpg'));
+    let blob;
+    try{
+      const res = await fetch(m.url, {mode:'cors'});
+      blob = await res.blob();
+    }catch(err){
+      // CORS зөвшөөрөгдөөгүй — шинэ таб-д нээж, гараар хадгалуулна
+      window.open(m.url, '_blank', 'noopener');
+      return;
+    }
+    const file = new File([blob], name, { type: blob.type || (m.type==='video'?'video/mp4':'image/jpeg') });
+
+    // Утас: Web Share → «Зураг хадгалах» сонголтоор Photos галерей руу орно
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      try{ await navigator.share({ files:[file] }); return; }
+      catch(err){ if(err && err.name === 'AbortError') return; /* цуцалсан бол зогсоно */ }
+    }
+    // Компьютер / fallback: шууд татах (Downloads)
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+  }
+
+  document.getElementById('lbClose').onclick = close;
+  prevBtn.onclick = () => go(-1);
+  nextBtn.onclick = () => go(1);
+  document.getElementById('lbDownload').onclick = download;
+  lb.addEventListener('click', e => { if(e.target === lb || e.target === stage) close(); });
+  document.addEventListener('keydown', e => {
+    if(!lb.classList.contains('show')) return;
+    if(e.key === 'Escape') close();
+    else if(e.key === 'ArrowLeft') go(-1);
+    else if(e.key === 'ArrowRight') go(1);
+  });
+
+  // Дуудагч (gallery.html/album.html) grid дээрх дарах үйлдлээ өөрөө хийж,
+  // энэ глобал функцээр lightbox-г нээнэ.
+  window.openLightbox = open;
+})();
+</script>

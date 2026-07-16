@@ -1,0 +1,22 @@
+<!-- Засах/нэмэх/хань/нэвтрэх маягтын хуудсуудын (edit/add/spouse/login) хамтын
+     загвар — өнгөний хувьсагч, суурь reset, "Минимал · мэргэжлийн" override.
+     Ашиглах: `<style>` доторх өөрийн хуудсын CSS-ийн ӨМНӨ include хийнэ. -->
+<style>
+  :root{ --navy:#122a5e; --navy-2:#1c3c7d; --navy-deep:#0a1c40; --gold:#d9b35c; --gold-2:#f0d28a;
+    --gold-deep:#a8842f; --paper:#fbf6ea; --ink:#2c2415; --soft:#8a7c5c; --card:#fffdf6;
+    --border:#e0d2ac; --f:#9c3b52; --f-soft:#f6e8ec; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  .fld label{ display:block; font-size:12.5px; color:var(--gold-deep); letter-spacing:.06em;
+    text-transform:uppercase; margin-bottom:6px; font-family:'Trebuchet MS',sans-serif; }
+  .btn:hover{ filter:brightness(1.08); }
+
+  /* ==== Минимал · мэргэжлийн override ==== */
+  :root{ --navy:#26324a; --navy-2:#3a4c6e; --navy-deep:#1c2536; --gold:#c0a24f; --gold-2:#d0b56f;
+    --gold-deep:#8f7330; --paper:#ffffff; --ink:#1d2432; --soft:#6f7787; --card:#ffffff;
+    --border:#e5e8ed; --line:#e4e7ec; --f:#a04d64; --f-soft:#f6ecf0; }
+  body{ background-color:#f5f6f8 !important; background-image:none !important;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,Arial,sans-serif !important; }
+  h1,h2,h3{ font-family:inherit !important; letter-spacing:-.01em; }
+  .card,.authcard{ box-shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.05) !important; }
+  .btn,.bigbtn{ background:var(--navy) !important; border-color:var(--navy) !important; }
+</style>
