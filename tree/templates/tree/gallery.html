@@ -30,6 +30,15 @@
   .edesc{ color:var(--ink); font-size:15px; line-height:1.6; margin-top:12px; }
   .count{ font-size:13px; color:var(--soft); margin:18px 2px 10px; }
 
+  .tabs{ display:flex; gap:8px; margin-top:18px; border-bottom:1px solid var(--border); }
+  .tab{ display:flex; align-items:center; gap:6px; padding:10px 4px; margin-bottom:-1px;
+    color:var(--soft); text-decoration:none; font-size:14.5px; font-weight:600;
+    border-bottom:2px solid transparent; }
+  .tab .n{ font-size:12px; font-weight:700; color:var(--soft); background:var(--cream);
+    border-radius:20px; padding:1px 8px; }
+  .tab.active{ color:var(--navy-deep); border-bottom-color:var(--navy); }
+  .tab.active .n{ background:var(--navy); color:#fff; }
+
   .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
   .cell{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; cursor:pointer;
     border:1px solid var(--border); background:#000; }
@@ -71,9 +80,14 @@
   </div>
   {% if event.description %}<p class="edesc">{{ event.description }}</p>{% endif %}
 
+  <div class="tabs">
+    <a class="tab{% if media_type == 'photo' %} active{% endif %}" href="?type=photo">📷 Зураг <span class="n">{{ photo_count }}</span></a>
+    <a class="tab{% if media_type == 'video' %} active{% endif %}" href="?type=video">🎬 Видео <span class="n">{{ video_count }}</span></a>
+  </div>
+
   {% if media %}
     <div class="count">
-      {{ total_count }} зураг / видео
+      {{ total_count }} {% if media_type == 'video' %}видео{% else %}зураг{% endif %}
       {% if page_obj.paginator.num_pages > 1 %} · {{ page_obj.number }}-р хуудас ({{ page_obj.paginator.num_pages }}-с){% endif %}
       · дарж томруулна
     </div>
@@ -95,7 +109,7 @@
     {% if page_obj.paginator.num_pages > 1 %}
       <nav class="pager">
         {% if page_obj.has_previous %}
-          <a class="pgbtn" href="?page={{ page_obj.previous_page_number }}">‹ Өмнөх</a>
+          <a class="pgbtn" href="?type={{ media_type }}&page={{ page_obj.previous_page_number }}">‹ Өмнөх</a>
         {% else %}
           <span class="pgbtn disabled">‹ Өмнөх</span>
         {% endif %}
@@ -104,14 +118,14 @@
             {% if n == page_obj.number %}
               <span class="pgnum current">{{ n }}</span>
             {% elif n == 1 or n == page_obj.paginator.num_pages or n|add:"-1" == page_obj.number or n|add:"1" == page_obj.number %}
-              <a class="pgnum" href="?page={{ n }}">{{ n }}</a>
+              <a class="pgnum" href="?type={{ media_type }}&page={{ n }}">{{ n }}</a>
             {% elif n == 2 or n == page_obj.paginator.num_pages|add:"-1" %}
               <span class="pgdots">…</span>
             {% endif %}
           {% endfor %}
         </div>
         {% if page_obj.has_next %}
-          <a class="pgbtn" href="?page={{ page_obj.next_page_number }}">Дараах ›</a>
+          <a class="pgbtn" href="?type={{ media_type }}&page={{ page_obj.next_page_number }}">Дараах ›</a>
         {% else %}
           <span class="pgbtn disabled">Дараах ›</span>
         {% endif %}
@@ -119,8 +133,8 @@
     {% endif %}
   {% else %}
     <div class="empty">
-      <div class="big">📷</div>
-      <div>Энэ баярын зураг хараахан ороогүй байна.</div>
+      <div class="big">{% if media_type == 'video' %}🎬{% else %}📷{% endif %}</div>
+      <div>Энэ баярын {% if media_type == 'video' %}видео{% else %}зураг{% endif %} хараахан ороогүй байна.</div>
       <div style="font-size:12.5px;margin-top:8px;opacity:.85">Зураг, видеогоо оруулахыг хүсвэл админд хандана уу.</div>
     </div>
   {% endif %}
