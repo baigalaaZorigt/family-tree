@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ..models import Person, PersonPhoto
 from .permissions import can_edit
 
+MAX_ALBUM_PHOTOS = 10
+
 
 def person_album(request, pk):
     """Хүний зургийн бүх цомгийг тусдаа хуудсанд (lightbox-той) харуулна."""
@@ -34,10 +36,17 @@ def add_photos(request, person_pk):
     if request.method == 'POST':
         files = request.FILES.getlist('photos')
         base = person.album.count()
-        for i, f in enumerate(files):
+        remaining = max(0, MAX_ALBUM_PHOTOS - base)
+        accepted, rejected = files[:remaining], files[remaining:]
+        for i, f in enumerate(accepted):
             PersonPhoto.objects.create(person=person, image=f, order=base + i)
-        if files:
-            messages.success(request, f'{len(files)} зураг цомогт нэмэгдлээ.')
+        if accepted:
+            messages.success(request, f'{len(accepted)} зураг цомогт нэмэгдлээ.')
+        if rejected:
+            messages.warning(
+                request,
+                f'Цомогт дээд тал нь {MAX_ALBUM_PHOTOS} зураг оруулах боломжтой тул '
+                f'{len(rejected)} зургийг нэмсэнгүй. Эхлээд хуучин зургаа устгана уу.')
     return redirect('person_detail', pk=person.pk)
 
 

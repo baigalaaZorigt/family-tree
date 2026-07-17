@@ -47,6 +47,12 @@
   .famphoto{ width:100%; max-width:520px; margin:16px auto 0; display:block; border-radius:14px;
     border:1px solid var(--border); }
 
+  .msg{ font-family:'Trebuchet MS',sans-serif; font-size:13.5px; border-radius:10px;
+    padding:11px 14px; margin-bottom:14px; }
+  .msg.error{ background:var(--f-soft); color:var(--f); border:1px solid #e5c2cb; }
+  .msg.success{ background:#e9f3ea; color:#2e6b3a; border:1px solid #bfe0c4; }
+  .msg.warning{ background:#fbf1de; color:#8a5a12; border:1px solid #ecd6a8; }
+
   .sect{ background:var(--card); border:1px solid var(--border); border-radius:16px;
     box-shadow:0 8px 26px rgba(10,28,64,.08); padding:20px 22px; margin-top:16px; }
   .sect h3{ font-family:'Trebuchet MS',sans-serif; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
@@ -119,6 +125,9 @@
   .upbtn{ font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; color:#fff;
     background:var(--navy); border:none; border-radius:10px; padding:11px 18px; }
   .upbtn:hover{ filter:brightness(1.08); }
+  .albumfull{ margin-top:14px; text-align:center; border:1px dashed var(--line); border-radius:10px;
+    padding:11px; color:var(--soft); font-size:13px; background:var(--paper);
+    font-family:'Trebuchet MS',sans-serif; }
 
   /* ==== Lightbox ==== */
   .lb{ position:fixed; inset:0; z-index:100; background:rgba(8,10,16,.96); display:none;
@@ -166,6 +175,9 @@
 </header>
 
 <div class="wrap">
+  {% for message in messages %}
+    <div class="msg {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
   <div class="phead">
     {% if person.photo %}
       <div class="avatar ph {{ person.gender }} clickimg" style="background-image:url('{{ person.photo.url }}')"
@@ -230,16 +242,20 @@
         <div class="albumempty">Одоогоор зураг нэмээгүй байна.</div>
       {% endif %}
       {% if can_edit %}
+        {% if album|length >= 10 %}
+          <div class="albumfull">Цомог дүүрсэн (дээд тал нь 10 зураг). Нэмэлт зураг оруулахын тулд эхлээд хуучин зургаа устгана уу.</div>
+        {% else %}
         <form class="uploadform" method="post" enctype="multipart/form-data"
               action="{% url 'add_photos' person.pk %}" data-loader="Зураг оруулж байна…">
           {% csrf_token %}
           <label class="uplabel">
             <input type="file" name="photos" accept="image/*" multiple required
                    onchange="this.form.querySelector('.upbtn').textContent='➕ '+this.files.length+' зураг нэмэх'">
-            <span class="upfake">🖼️ Зураг сонгох (олноор)</span>
+            <span class="upfake">🖼️ Зураг сонгох (олноор, дээд тал нь {{ album_remaining }})</span>
           </label>
           <button class="upbtn" type="submit">➕ Зураг нэмэх</button>
         </form>
+        {% endif %}
       {% endif %}
     </div>
   {% endif %}

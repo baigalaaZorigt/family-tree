@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from ..models import Notification, Person
 from .permissions import can_edit, current_person
+from .photos import MAX_ALBUM_PHOTOS
 
 EDITABLE_FIELDS = ['name', 'birth', 'death', 'spouse', 'bio', 'phone', 'social', 'address']
 
@@ -28,6 +29,7 @@ def person_detail(request, pk):
         'descendants_count': len(person.descendant_ids()),
         'album': album,
         'album_json': album_json,
+        'album_remaining': max(0, MAX_ALBUM_PHOTOS - len(album)),
     })
 
 
