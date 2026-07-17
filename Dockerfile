@@ -5,9 +5,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# psycopg2 runtime + db хүлээх netcat
+# psycopg2 runtime + db хүлээх netcat + баярын видеоны poster frame гаргах ffmpeg
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libpq5 netcat-openbsd \
+        libpq5 netcat-openbsd ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
