@@ -28,6 +28,17 @@ server {
 
     client_max_body_size 30M;   # олон зураг оруулахад
 
+    # Нүүр хуудас мэт том (~1MB+, ихэвчлэн inline CSS/JS) хариултуудыг шахаж
+    # дамжуулна — 200 хүн зэрэг ачаалахад сүлжээний ачааллыг мэдэгдэхүйц бууруулна.
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 512;
+    gzip_types text/plain text/css text/xml text/javascript
+               application/json application/javascript application/xml+rss
+               image/svg+xml;
+
     location /static/ {
         alias /app/staticfiles/;
         access_log off;
