@@ -718,17 +718,7 @@
   <div class="fhead">📣 Сүүлийн үйл явдал</div>
   {% for note in notifications %}
     {% if note.video_url %}
-      <div class="fcard vidcard clickable"
-           data-video="{{ note.video_url }}" data-poster="{{ note.video_poster }}" data-caption="{{ note.title }}">
-        <div class="vidthumb" {% if note.video_poster %}style="background-image:url('{{ note.video_poster }}')"{% endif %}>
-          <span class="vidplay">▶</span>
-        </div>
-        <div class="vidinfo">
-          <div class="ftitle">{{ note.title }}</div>
-          {% if note.body %}<div class="fmeta">{{ note.body }}</div>{% endif %}
-          <div class="ftime">{{ note.created_at|date:"Y.m.d · H:i" }}</div>
-        </div>
-      </div>
+      {% include 'tree/_vidcard.html' %}
     {% else %}
     <div class="fcard event{% if note.person %} clickable{% endif %}"
          {% if note.person %}data-focus="{{ note.person_id }}"{% endif %}>
@@ -879,17 +869,7 @@
     <div class="notiflist">
       {% for note in notifications %}
         {% if note.video_url %}
-          <div class="fcard vidcard clickable"
-               data-video="{{ note.video_url }}" data-poster="{{ note.video_poster }}" data-caption="{{ note.title }}">
-            <div class="vidthumb" {% if note.video_poster %}style="background-image:url('{{ note.video_poster }}')"{% endif %}>
-              <span class="vidplay">▶</span>
-            </div>
-            <div class="vidinfo">
-              <div class="ftitle">{{ note.title }}</div>
-              {% if note.body %}<div class="fmeta">{{ note.body }}</div>{% endif %}
-              <div class="ftime">{{ note.created_at|date:"Y.m.d · H:i" }}</div>
-            </div>
-          </div>
+          {% include 'tree/_vidcard.html' %}
         {% else %}
         <a class="noteitem{% if note.person %} clickable{% endif %}"
            {% if note.person %}data-focus="{{ note.person_id }}"{% endif %}>
