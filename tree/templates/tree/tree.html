@@ -1253,7 +1253,9 @@ function switchTab(name, rebuild){
     if(state.mode === 'overview' || !state.center) buildOverview();
     else buildFocus(state.center);
   }
-  window.scrollTo({ top:0, behavior:'smooth' });
+  // Шууд (animation-гүй) шилжинэ — smooth scroll нь iOS Safari дээр доод
+  // toolbar-ыг дахин гаргаж, доод таб самбарыг түр «дээшлүүлж» харагдуулдаг байсан.
+  window.scrollTo(0, 0);
 }
 document.querySelectorAll('.tabbar .tab').forEach(t =>
   t.addEventListener('click', () => switchTab(t.dataset.tab)));
