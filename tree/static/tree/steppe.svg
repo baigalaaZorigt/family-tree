@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 320" width="1400" height="320" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#aacbe6"/>
+      <stop offset="60%" stop-color="#cfe2ee"/>
+      <stop offset="100%" stop-color="#e6efe0"/>
+    </linearGradient>
+    <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fb27f"/><stop offset="100%" stop-color="#7ba36b"/>
+    </linearGradient>
+    <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7aa066"/><stop offset="100%" stop-color="#6b9558"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6f9a54"/><stop offset="100%" stop-color="#5e8c46"/>
+    </linearGradient>
+  </defs>
+
+  <!-- sky -->
+  <rect width="1400" height="320" fill="url(#sky)"/>
+
+  <!-- clouds (soft) -->
+  <g fill="#ffffff" opacity="0.7">
+    <ellipse cx="230" cy="46" rx="70" ry="20"/><ellipse cx="300" cy="40" rx="55" ry="22"/><ellipse cx="170" cy="52" rx="45" ry="16"/>
+    <ellipse cx="960" cy="40" rx="80" ry="22"/><ellipse cx="1040" cy="50" rx="55" ry="18"/><ellipse cx="890" cy="52" rx="45" ry="14"/>
+  </g>
+
+  <!-- far mountain ridge -->
+  <path d="M0 150 Q120 120 240 138 T480 132 T720 124 T960 140 T1200 122 T1400 138 L1400 320 L0 320 Z" fill="#a9c0c4" opacity="0.55"/>
+  <!-- mid hills -->
+  <path d="M0 178 Q180 150 360 172 T720 160 T1080 178 T1400 160 L1400 320 L0 320 Z" fill="url(#hill1)"/>
+  <!-- near rolling hills -->
+  <path d="M0 214 Q220 188 440 210 T880 202 T1400 214 L1400 320 L0 320 Z" fill="url(#hill2)"/>
+  <!-- foreground grass -->
+  <rect x="0" y="252" width="1400" height="68" fill="url(#grass)"/>
+  <path d="M0 252 Q350 240 700 252 T1400 252 L1400 270 L0 270 Z" fill="#7aa45c" opacity="0.6"/>
+
+  <!-- ===== Ovoo (sacred cairn with prayer flags) left ===== -->
+  <g transform="translate(150,252)">
+    <!-- pole -->
+    <rect x="-2" y="-86" width="4" height="86" fill="#6b5836"/>
+    <circle cx="0" cy="-90" r="5" fill="#caa44a"/>
+    <path d="M0 -95 q-3 -8 0 -14 q3 6 0 14" fill="#caa44a"/>
+    <!-- flag fan strings -->
+    <g stroke="#9aa6b0" stroke-width="1">
+      <path d="M0 -86 L-70 -2"/><path d="M0 -86 L-44 -2"/><path d="M0 -86 L-18 -2"/>
+      <path d="M0 -86 L18 -2"/><path d="M0 -86 L44 -2"/><path d="M0 -86 L70 -2"/>
+    </g>
+    <!-- little colored flags -->
+    <g>
+      <rect x="-70" y="-10" width="9" height="6" fill="#3a78c0"/><rect x="-54" y="-22" width="9" height="6" fill="#e0b23a"/>
+      <rect x="-38" y="-34" width="9" height="6" fill="#cf4b3a"/><rect x="-22" y="-46" width="9" height="6" fill="#fff"/>
+      <rect x="13" y="-46" width="9" height="6" fill="#4aa05a"/><rect x="29" y="-34" width="9" height="6" fill="#3a78c0"/>
+      <rect x="45" y="-22" width="9" height="6" fill="#e0b23a"/><rect x="61" y="-10" width="9" height="6" fill="#cf4b3a"/>
+    </g>
+    <!-- stone base -->
+    <ellipse cx="0" cy="2" rx="26" ry="8" fill="#8a8576"/>
+    <path d="M-18 0 l6 -10 l8 6 l6 -8 l8 10 Z" fill="#9a9486"/>
+  </g>
+
+  <!-- ===== Gers (yurts) ===== -->
+  <g>
+    <!-- big ger right -->
+    <g transform="translate(1170,252)">
+      <ellipse cx="0" cy="2" rx="62" ry="10" fill="#000" opacity="0.08"/>
+      <path d="M-58 0 L-58 -26 Q0 -52 58 -26 L58 0 Z" fill="#f2efe6"/>
+      <path d="M-58 -26 Q0 -52 58 -26" fill="none" stroke="#d8d2c2" stroke-width="2"/>
+      <path d="M-58 -26 Q0 -64 58 -26 L58 -26 Q0 -52 -58 -26 Z" fill="#e6e0d0"/>
+      <rect x="-12" y="-20" width="24" height="20" fill="#7a5a3a"/>
+      <rect x="-12" y="-20" width="24" height="20" fill="none" stroke="#5a4228" stroke-width="2"/>
+      <path d="M0 -52 L0 -62 M-7 -60 H7" stroke="#caa44a" stroke-width="2"/>
+    </g>
+    <!-- medium ger -->
+    <g transform="translate(1010,256) scale(0.78)">
+      <ellipse cx="0" cy="2" rx="62" ry="10" fill="#000" opacity="0.08"/>
+      <path d="M-58 0 L-58 -26 Q0 -52 58 -26 L58 0 Z" fill="#f2efe6"/>
+      <rect x="-11" y="-18" width="22" height="18" fill="#7a5a3a"/>
+      <path d="M0 -52 L0 -60 M-6 -58 H6" stroke="#caa44a" stroke-width="2"/>
+    </g>
+    <!-- small ger far left -->
+    <g transform="translate(330,258) scale(0.62)">
+      <path d="M-58 0 L-58 -26 Q0 -52 58 -26 L58 0 Z" fill="#efece2"/>
+      <rect x="-10" y="-16" width="20" height="16" fill="#7a5a3a"/>
+    </g>
+  </g>
+
+  <!-- ===== Horse & rider ===== -->
+  <g transform="translate(560,256)">
+    <g fill="#43352a">
+      <!-- body -->
+      <path d="M-30 -12 Q-30 -22 -16 -22 L14 -22 Q20 -22 22 -16 L34 -16 Q40 -16 40 -22 L44 -22 L40 -12 Q40 -8 34 -8 L24 -8
+               L24 0 L19 0 L19 -8 L-10 -8 L-10 0 L-15 0 L-15 -8 Q-30 -8 -30 -12 Z"/>
+      <!-- legs -->
+      <rect x="-24" y="-8" width="3.5" height="10"/><rect x="-12" y="-8" width="3.5" height="10"/>
+      <rect x="14" y="-8" width="3.5" height="10"/><rect x="26" y="-8" width="3.5" height="10"/>
+      <!-- neck + head -->
+      <path d="M22 -16 L30 -34 L36 -34 L33 -22 Z"/>
+      <path d="M30 -34 q5 -3 9 -1 l-3 5 Z"/>
+      <!-- tail -->
+      <path d="M-30 -18 q-10 1 -13 13 q7 -3 13 -7 Z"/>
+    </g>
+    <!-- rider -->
+    <path d="M5 -22 L-2 -42 Q5 -49 12 -42 L7 -22 Z" fill="#2f5aa0"/>
+    <circle cx="5" cy="-47" r="5" fill="#c89a6a"/>
+    <ellipse cx="5" cy="-51" rx="7" ry="3" fill="#3a2a1a"/>
+  </g>
+    <!-- ===== Grazing animals ===== -->
+  <g fill="#efe9dc">
+    <g transform="translate(430,268)"><ellipse cx="0" cy="0" rx="8" ry="5"/><ellipse cx="13" cy="2" rx="7" ry="4.5"/><ellipse cx="25" cy="-1" rx="6" ry="4"/><circle cx="-6" cy="-2" r="2.5" fill="#5a4a38"/><circle cx="19" cy="0" r="2.2" fill="#5a4a38"/></g>
+    <g transform="translate(820,272) scale(0.9)"><ellipse cx="0" cy="0" rx="8" ry="5"/><ellipse cx="13" cy="2" rx="7" ry="4.5"/><circle cx="-6" cy="-2" r="2.5" fill="#5a4a38"/></g>
+    <g transform="translate(700,278) scale(0.8)"><ellipse cx="0" cy="0" rx="8" ry="5"/><ellipse cx="12" cy="1" rx="6" ry="4"/></g>
+  </g>
+
+  <!-- distant horses -->
+  <g fill="#6b4a32" opacity="0.85">
+    <g transform="translate(900,250) scale(0.5)"><path d="M-20 0 L-20 -10 L-16 -10 L-16 -2 L-8 -2 L-8 -14 Q-8 -18 2 -18 L18 -18 L24 -26 L28 -26 L26 -18 Q30 -16 30 -10 L30 -2 L26 -2 L26 -10 L20 -10 L20 0 L14 0 L14 -10 L-2 -10 L-2 0 Z"/></g>
+    <g transform="translate(950,252) scale(0.45)"><path d="M-20 0 L-20 -10 L-16 -10 L-16 -2 L-8 -2 L-8 -14 Q-8 -18 2 -18 L18 -18 L24 -26 L28 -26 L26 -18 Q30 -16 30 -10 L30 -2 L26 -2 L26 -10 L20 -10 L20 0 L14 0 L14 -10 L-2 -10 L-2 0 Z"/></g>
+  </g>
+</svg>
