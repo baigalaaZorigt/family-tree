@@ -117,12 +117,16 @@ class Notification(models.Model):
         ('birth', 'Шинэ гишүүн'),
         ('spouse', 'Гэр бүл'),
         ('edit', 'Мэдээлэл шинэчлэл'),
+        ('video', 'Видео'),
     ]
     kind = models.CharField('Төрөл', max_length=20, choices=KIND_CHOICES, default='birth')
     title = models.CharField('Гарчиг', max_length=200)
     body = models.CharField('Тайлбар', max_length=400, blank=True)
     person = models.ForeignKey(Person, verbose_name='Холбоотой хүн', null=True, blank=True,
                                related_name='notifications', on_delete=models.SET_NULL)
+    video_url = models.URLField('Видео URL', max_length=600, blank=True,
+                                help_text='S3 дээрх видеоны нийтийн (public) URL. Бөглөвөл дарахад lightbox-оор тоглуулна.')
+    video_poster = models.URLField('Видеоны poster зураг URL', max_length=600, blank=True)
     created_at = models.DateTimeField('Огноо', auto_now_add=True)
 
     class Meta:
@@ -135,7 +139,7 @@ class Notification(models.Model):
 
     @property
     def icon(self):
-        return {'birth': '👶', 'spouse': '💍', 'edit': '✏️'}.get(self.kind, '🔔')
+        return {'birth': '👶', 'spouse': '💍', 'edit': '✏️', 'video': '🎬'}.get(self.kind, '🔔')
 
 
 class Event(models.Model):

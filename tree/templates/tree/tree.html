@@ -537,6 +537,8 @@
   .ftitle { font-weight:700; color:var(--navy-deep); font-size:15px; line-height:1.35; }
   .fmeta { color:var(--ink); font-size:13.5px; margin-top:3px; line-height:1.5; }
   .ftime { color:var(--soft); font-size:11.5px; margin-top:5px; }
+  .fplay { flex:none; align-self:center; width:34px; height:34px; border-radius:50%;
+    background:var(--navy); color:#fff; display:grid; place-items:center; font-size:13px; }
   .fcard.empty { text-align:center; padding:34px 20px; color:var(--soft); }
   .eico { font-size:38px; margin-bottom:8px; }
   .esub { font-size:12.5px; margin-top:6px; opacity:.85; }
@@ -705,13 +707,16 @@
   <!-- Сүүлийн үйл явдал (news feed) -->
   <div class="fhead">📣 Сүүлийн үйл явдал</div>
   {% for note in notifications %}
-    <div class="fcard event{% if note.person %} clickable{% endif %}"{% if note.person %} data-focus="{{ note.person_id }}"{% endif %}>
+    <div class="fcard event{% if note.person or note.video_url %} clickable{% endif %}"
+         {% if note.video_url %}data-video="{{ note.video_url }}" data-poster="{{ note.video_poster }}" data-caption="{{ note.title }}"
+         {% elif note.person %}data-focus="{{ note.person_id }}"{% endif %}>
       <span class="fico">{{ note.icon }}</span>
       <div class="fbody">
         <div class="ftitle">{{ note.title }}</div>
         {% if note.body %}<div class="fmeta">{{ note.body }}</div>{% endif %}
         <div class="ftime">{{ note.created_at|date:"Y.m.d · H:i" }}</div>
       </div>
+      {% if note.video_url %}<span class="fplay">▶</span>{% endif %}
     </div>
   {% empty %}
     <div class="fcard empty">
@@ -851,14 +856,16 @@
     <p class="notifsub">Шинэ гишүүн нэмэгдэх, гэр бүл болох зэрэг ургийн сүүлийн үйл явдлууд.</p>
     <div class="notiflist">
       {% for note in notifications %}
-        <a class="noteitem{% if note.person %} clickable{% endif %}"
-           {% if note.person %}data-focus="{{ note.person_id }}"{% endif %}>
+        <a class="noteitem{% if note.person or note.video_url %} clickable{% endif %}"
+           {% if note.video_url %}data-video="{{ note.video_url }}" data-poster="{{ note.video_poster }}" data-caption="{{ note.title }}"
+           {% elif note.person %}data-focus="{{ note.person_id }}"{% endif %}>
           <span class="noteico">{{ note.icon }}</span>
           <span class="notebody">
             <span class="notehead">{{ note.title }}</span>
             {% if note.body %}<span class="notemeta">{{ note.body }}</span>{% endif %}
             <span class="notetime">{{ note.created_at|date:"Y.m.d H:i" }}</span>
           </span>
+          {% if note.video_url %}<span class="fplay">▶</span>{% endif %}
         </a>
       {% empty %}
         <div class="noteempty">
@@ -1451,6 +1458,19 @@ if(focusId){
   buildOverview();
 }
 showHint('Хүн дээр дарж түүнийг төв болгоно · хоёр хуруугаар томруулна', 'start');
+</script>
+<script>window.LIGHTBOX_ITEMS = [];</script>
+{% include 'tree/_lightbox.html' %}
+<script>
+// Мэдэгдэл дэх видео карт дээр дарвал lightbox-оор тоглуулна
+document.querySelectorAll('[data-video]').forEach(el =>
+  el.addEventListener('click', () => {
+    // _lightbox.html эхлэлдээ ITEMS-г нэг удаа хуулж авдаг тул шинэ массив
+    // оноохын оронд яг тэр массивыг нь дотор нь солино (in-place).
+    window.LIGHTBOX_ITEMS.length = 0;
+    window.LIGHTBOX_ITEMS.push({ type:'video', url: el.dataset.video, poster: el.dataset.poster || '', caption: el.dataset.caption || '' });
+    window.openLightbox(0);
+  }));
 </script>
 {% include 'tree/_loader.html' %}
 </body>
