@@ -91,6 +91,7 @@
     if(m.type === 'video'){
       el = document.createElement('video');
       el.src = m.url; el.controls = true; el.autoplay = true; el.playsInline = true;
+      if(m.poster) el.poster = m.poster;
       spinEl.classList.remove('show');
     } else {
       el = document.createElement('img');
