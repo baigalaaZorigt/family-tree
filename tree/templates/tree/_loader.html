@@ -23,16 +23,27 @@
 <script>
 (function(){
   const ov = document.getElementById('ldrOverlay'), txt = document.getElementById('ldrText');
-  function show(msg){ if(msg) txt.textContent = msg; ov.classList.add('show'); }
-  function hide(){ ov.classList.remove('show'); }
+  let safetyTimer = null;
+  function show(msg){
+    if(msg) txt.textContent = msg;
+    ov.classList.add('show');
+    // Ямар нэг урьдчилан тооцоогүй тохиолдолд spinner мөнхөд гацахаас хамгаална
+    clearTimeout(safetyTimer);
+    safetyTimer = setTimeout(hide, 15000);
+  }
+  function hide(){ clearTimeout(safetyTimer); ov.classList.remove('show'); }
   window.__showLoader = show;
   window.__hideLoader = hide;
-  // Форм илгээх үед (засвар, зураг оруулах, нэвтрэх г.м.) — удаан үед spinner
+  // Форм илгээх үед (засвар, зураг оруулах, нэвтрэх г.м.) — удаан үед spinner.
+  // Bubble phase-д сонсоно (capture биш) — ингэснээр формын өөрийнх нь
+  // onsubmit="return confirm(...)" эхэлж ажиллачихсан байдаг тул Cancel дарахад
+  // defaultPrevented=true болсныг доор шалгаж spinner-г үзүүлэхгүй.
   document.addEventListener('submit', function(e){
+    if(e.defaultPrevented) return;
     const f = e.target;
     if(f.hasAttribute('data-noloader')) return;
     show(f.getAttribute('data-loader') || 'Түр хүлээнэ үү…');
-  }, true);
+  }, false);
   // Дотоод хуудас руу шилжих холбоос дарахад
   document.addEventListener('click', function(e){
     const a = e.target.closest('a');
