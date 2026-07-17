@@ -17,7 +17,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             return redirect('/')
-        error = 'Утас эсвэл төрсөн огноо буруу байна. (Нууц үг = төрсөн огноо, ж: 1965.02.26)'
+        error = 'Утас эсвэл төрсөн он буруу байна. (Нууц үг = төрсөн он, ж: 1965)'
     return render(request, 'tree/login.html', {'error': error})
 
 

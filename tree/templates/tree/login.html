@@ -44,11 +44,11 @@
       <input id="u" name="username" inputmode="tel" autocomplete="username" placeholder="9911xxxx" required autofocus>
     </div>
     <div class="fld">
-      <label for="p">Төрсөн он-сар-өдөр (нууц үг)</label>
-      <input id="p" name="password" type="password" autocomplete="current-password" placeholder="1965.02.26" required>
+      <label for="p">Төрсөн он (нууц үг)</label>
+      <input id="p" name="password" type="password" autocomplete="current-password" placeholder="1965" inputmode="numeric" required>
     </div>
     <button class="btn" type="submit">Нэвтрэх</button>
-    <div class="hint">Нэвтрэх нэр нь <b>утасны дугаар</b>, нууц үг нь <b>төрсөн огноо</b> (жишээ нь 1965.02.26 эсвэл 1965).</div>
+    <div class="hint">Нэвтрэх нэр нь <b>утасны дугаар</b>, нууц үг нь <b>төрсөн он</b> (жишээ нь 1965).</div>
     <a class="back" href="{% url 'tree' %}">← Ургийн мод руу буцах</a>
   </form>
 {% include 'tree/_loader.html' %}

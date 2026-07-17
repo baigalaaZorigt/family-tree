@@ -1,14 +1,19 @@
-"""Нэвтрэлт: username = утасны дугаар, password = төрсөн он-сар-өдөр.
+"""Нэвтрэлт: username = утасны дугаар, password = төрсөн ОН (жилээр).
 
 Хүн бүр Person бичлэгтэй. Утас нь тодорхойлогдсон хүн (ихэвчлэн насанд хүрсэн)
-өөрийн утсаар нэвтэрч, нууц үг нь өөрийнх нь төрсөн огноо байна.
+өөрийн утсаар нэвтэрч, нууц үг нь зөвхөн төрсөн оны 4 оронтой тоо байна
+(жишээ нь birth талбар «1965.02.26» байсан ч нууц үг нь зөвхөн «1965»).
 """
+import re
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 
-from .models import Person, normalize_birth
+from .models import Person
 
 User = get_user_model()
+
+YEAR_RE = re.compile(r'(18|19|20)\d\d')
 
 
 class PhoneBirthBackend(BaseBackend):
@@ -29,8 +34,10 @@ class PhoneBirthBackend(BaseBackend):
         if person is None:
             return None
 
-        # Нууц үг = төрсөн огноо (цифрүүдээр жишнэ)
-        if not person.birth_key or normalize_birth(password) != person.birth_key:
+        # Нууц үг = төрсөн оны 4 оронтой тоо (birth талбараас оныг ялгаж авна)
+        m = YEAR_RE.search(person.birth or '')
+        typed_year = ''.join(ch for ch in str(password) if ch.isdigit())
+        if not m or typed_year != m.group(0):
             return None
 
         return self._get_or_create_user(person)
