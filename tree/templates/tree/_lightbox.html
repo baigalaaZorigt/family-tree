@@ -219,32 +219,25 @@
   // Компьютер: давхар товших (dblclick) → томруулах/буцаах
   stage.addEventListener('dblclick', e => toggleTapZoom(e.clientX, e.clientY));
 
-  // Татах / хадгалах — утсан дээр зургийн галерей (Photos) руу, компьютерт Downloads руу
+  // Татах / хадгалах — шууд файлыг татаж авна (сонголтын цэс/шинэ таб руу үсрэхгүй).
+  // Android дээр Chrome таталтыг Татсан файлууд-д хадгалдаг бөгөөд Google Photos
+  // үүнийг өөрөө индексжүүлж, галерейд харуулдаг тул шууд нэг товшилтоор хангалттай.
   async function download(){
     const m = ITEMS[cur];
     const ext = (m.url.split('?')[0].split('.').pop() || '').slice(0,4).toLowerCase();
     const name = 'haltarynkhan-' + (cur+1) + (ext ? '.'+ext : (m.type==='video'?'.mp4':'.jpg'));
-    let blob;
     try{
       const res = await fetch(m.url, {mode:'cors'});
-      blob = await res.blob();
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
     }catch(err){
-      // CORS зөвшөөрөгдөөгүй — шинэ таб-д нээж, гараар хадгалуулна
-      window.open(m.url, '_blank', 'noopener');
-      return;
+      // Татах бүрэн бүтэлгүйтвэл л (сүлжээ тасарсан г.м.) эх URL руу шууд чиглүүлнэ
+      location.href = m.url;
     }
-    const file = new File([blob], name, { type: blob.type || (m.type==='video'?'video/mp4':'image/jpeg') });
-
-    // Утас: Web Share → «Зураг хадгалах» сонголтоор Photos галерей руу орно
-    if(navigator.canShare && navigator.canShare({ files:[file] })){
-      try{ await navigator.share({ files:[file] }); return; }
-      catch(err){ if(err && err.name === 'AbortError') return; /* цуцалсан бол зогсоно */ }
-    }
-    // Компьютер / fallback: шууд татах (Downloads)
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
   }
 
   document.getElementById('lbClose').onclick = close;

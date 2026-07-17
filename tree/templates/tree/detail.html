@@ -339,16 +339,15 @@ async function download(){
   const m = viewList[cur];
   const ext = (m.url.split('?')[0].split('.').pop() || 'jpg').slice(0,4).toLowerCase();
   const name = 'haltarynkhan-'+(cur+1)+'.'+ext;
-  let blob;
-  try{ blob = await (await fetch(m.url, {mode:'cors'})).blob(); }
-  catch(e){ window.open(m.url,'_blank','noopener'); return; }
-  const file = new File([blob], name, {type: blob.type || 'image/jpeg'});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{ await navigator.share({files:[file]}); return; }
-    catch(err){ if(err && err.name==='AbortError') return; }
+  try{
+    const res = await fetch(m.url, {mode:'cors'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  }catch(e){
+    location.href = m.url;
   }
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 document.querySelectorAll('.acell').forEach(c =>
   c.addEventListener('click', e => { if(e.target.closest('.adel')) return; open(+c.dataset.i); }));
