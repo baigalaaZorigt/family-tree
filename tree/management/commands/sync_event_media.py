@@ -178,12 +178,14 @@ class Command(BaseCommand):
         return None
 
     def _list_keys(self, prefix):
+        """Зөвхөн prefix-ийн ЭХ (root) түвшний файлуудыг буцаана — дэд хавтаст
+        (thumbs/, web/, featured/ гэх мэт аль ч нэртэй) байгаа зүйлийг үл хэрэгсэнэ."""
         paginator = self.s3.get_paginator('list_objects_v2')
         keys = []
         for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
             for obj in page.get('Contents', []):
                 k = obj['Key']
-                if k == prefix or k.startswith(f'{prefix}thumbs/') or k.startswith(f'{prefix}web/'):
+                if k == prefix or '/' in k[len(prefix):]:
                     continue
                 keys.append(k)
         return keys
