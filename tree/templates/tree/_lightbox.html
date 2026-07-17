@@ -222,9 +222,13 @@
   // Компьютер: давхар товших (dblclick) → томруулах/буцаах
   stage.addEventListener('dblclick', e => toggleTapZoom(e.clientX, e.clientY));
 
-  // Татах / хадгалах — шууд файлыг татаж авна (сонголтын цэс/шинэ таб руу үсрэхгүй).
-  // Android дээр Chrome таталтыг Татсан файлууд-д хадгалдаг бөгөөд Google Photos
-  // үүнийг өөрөө индексжүүлж, галерейд харуулдаг тул шууд нэг товшилтоор хангалттай.
+  // Татах / хадгалах — хамгийн цөөн алхамтай байхаар зохион байгуулав.
+  // iOS Safari дээр blob:-г "download" attribute-аар шууд татаж авдаггүй (зөвхөн
+  // preview нээдэг тул хэрэглэгч дараа нь Share→Save Image гэж бас нэг алхам хийх
+  // шаардлагатай болдог), харин navigator.share({files}) дуудвал ЯГ ХАРИН тэрхүү
+  // "Save Image" сонголтыг шууд нэг дэлгэц дээр шууд харуулдаг тул зөвхөн 1 товшилт
+  // (Хадгалах) л шаардана. Android дээр ч мөн адил — Share sheet-ийн эхэнд «Save to
+  // Photos» гардаг тул нэг товшилт хангалттай. Тиймээс Web Share-г эхлээд оролдоно.
   async function download(){
     const m = ITEMS[cur];
     const ext = (m.url.split('?')[0].split('.').pop() || '').slice(0,4).toLowerCase();
@@ -233,6 +237,13 @@
       const res = await fetch(m.url, {mode:'cors'});
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const blob = await res.blob();
+      const file = new File([blob], name, { type: blob.type || (m.type==='video'?'video/mp4':'image/jpeg') });
+
+      if(navigator.canShare && navigator.canShare({ files:[file] })){
+        try{ await navigator.share({ files:[file] }); return; }
+        catch(err){ if(err && err.name === 'AbortError') return; /* цуцалсан бол дахин оролдохгүй */ }
+      }
+      // Компьютер эсвэл Share дэмжигдэхгүй үед: шууд Downloads руу татна
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
