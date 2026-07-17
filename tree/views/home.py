@@ -1,28 +1,25 @@
+import copy
 import json
 
+from django.core.cache import cache
 from django.shortcuts import render
 
 from ..models import Event, Notification, Person
 from .permissions import current_person, is_admin
 from .stats import compute_stats
 
+# Нүүр хуудасны мод/статистикийг кэшлэнэ — Person/Spouse хадгалагдах бүрд
+# (models.py-ийн save/delete) цэвэрлэгдэнэ. TTL нь зөвхөн нөөц хамгаалалт.
+HOME_TREE_CACHE_KEY = 'home_tree_base'
+HOME_STATS_CACHE_KEY = 'home_stats'
+HOME_CACHE_TTL = 600
 
-def _serialize(request):
-    """Бүх Person-г ургийн модны нэст JSON бүтэц болгож хувиргана.
-    Frontend-ийн хүлээж буй түлхүүрүүд: name, g, gen, role, birth, death,
-    spouse, bio, ch — дээр нь id, phone, social, address, photo, editable."""
-    people = list(Person.objects.select_related('parent').prefetch_related('spouse_details').all())
 
-    # Засах эрхтэй id-уудын багц.
-    # Админ — бүх хүн. Бусад — өөрийн + доош бүх үр удам.
-    me = current_person(request)
-    editable_ids = set()
-    if is_admin(request):
-        editable_ids = {p.id for p in people}
-    elif me is not None:
-        editable_ids.add(me.id)
-        editable_ids.update(me.descendant_ids())
-
+def _serialize_base(people):
+    """Бүх Person-г ургийн модны нэст JSON бүтэц болгож хувиргана (хэрэглэгчээс
+    үл хамаарах хэсэг — 'editable' энд ОРОХГҮЙ, кэшлэгдэнэ). Frontend-ийн хүлээж
+    буй түлхүүрүүд: name, g, gen, role, birth, death, spouse, bio, ch — дээр нь
+    id, phone, social, address, photo."""
     nodes = {}
     for p in people:
         node = {
@@ -72,8 +69,6 @@ def _serialize(request):
             sp_list.append(s)
         if sp_list:
             node['spouses'] = sp_list
-        if p.id in editable_ids:
-            node['editable'] = True
         nodes[p.id] = node
 
     root = None
@@ -86,11 +81,46 @@ def _serialize(request):
     return root
 
 
+def _apply_editable(node, editable_ids):
+    """Кэшлэгдсэн модон дээр тухайн хэрэглэгчид зориулсан 'editable' тэмдгийг
+    дарж бичнэ (кэш дэх эх хувийг өөрчлөхгүй, дуудагч аль хэдийн хуулбар өгсөн)."""
+    if node['id'] in editable_ids:
+        node['editable'] = True
+    for ch in node.get('ch', []):
+        _apply_editable(ch, editable_ids)
+
+
+def _editable_ids(request, me):
+    """Одоогийн хэрэглэгчийн засах эрхтэй id-уудын багц (зочин бол хоосон,
+    нэмэлт DB хайлт хийхгүй)."""
+    if is_admin(request):
+        return set(Person.objects.values_list('id', flat=True))
+    if me is not None:
+        return {me.id, *me.descendant_ids()}
+    return set()
+
+
 def tree_view(request):
-    root = _serialize(request)
+    base_tree = cache.get(HOME_TREE_CACHE_KEY)
+    stats = cache.get(HOME_STATS_CACHE_KEY)
+    if base_tree is None or stats is None:
+        people = list(Person.objects.select_related('parent').prefetch_related('spouse_details').all())
+        if base_tree is None:
+            base_tree = _serialize_base(people)
+            cache.set(HOME_TREE_CACHE_KEY, base_tree, HOME_CACHE_TTL)
+        if stats is None:
+            stats = compute_stats(people)
+            cache.set(HOME_STATS_CACHE_KEY, stats, HOME_CACHE_TTL)
+
+    # editable тэмдгийг хэрэглэгч тус бүрд өөрчилдөг тул кэшийг хуулбарлаад дараад бичнэ
+    root = copy.deepcopy(base_tree)
+    me = current_person(request)
+    editable_ids = _editable_ids(request, me)
+    if editable_ids:
+        _apply_editable(root, editable_ids)
+
     # </script> тарайлтаас сэргийлэх
     data_json = json.dumps(root, ensure_ascii=False).replace('</', '<\\/')
-    stats = compute_stats(list(Person.objects.prefetch_related('spouse_details').all()))
 
     events = list(Event.objects.prefetch_related('media').all())
     # Дараагийн Ургийн баяр (3 жилд нэг удаа) — сүүлийн баярын оноос тооцно
@@ -100,7 +130,7 @@ def tree_view(request):
     return render(request, 'tree/tree.html', {
         'data_json': data_json,
         'stats': stats,
-        'me': current_person(request),
+        'me': me,
         'notifications': Notification.objects.all()[:50],
         'events': events,
         'next_bayar': next_bayar,

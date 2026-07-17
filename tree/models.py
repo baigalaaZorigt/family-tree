@@ -21,6 +21,13 @@ def normalize_birth(value):
     return re.sub(r'\D', '', str(value))
 
 
+def _clear_home_cache():
+    """Нүүр хуудасны мод/статистикийн кэшийг цэвэрлэнэ (tree/views/home.py-д
+    ашиглагддаг key-тэй давхацсан утга — эндээс import хийхгүйн тулд шууд бичив)."""
+    cache.delete('home_tree_base')
+    cache.delete('home_stats')
+
+
 class Person(models.Model):
     GENDER_CHOICES = [('m', 'Эрэгтэй'), ('f', 'Эмэгтэй')]
 
@@ -109,6 +116,14 @@ class Person(models.Model):
             return True
         # editor нь энэ хүний өвөг дээдсийн дунд байвал (editor -> ... -> self)
         return editor.id in [a.id for a in self.ancestors()]
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        _clear_home_cache()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        _clear_home_cache()
 
 
 class Notification(models.Model):
@@ -230,6 +245,14 @@ class Spouse(models.Model):
 
     def __str__(self):
         return f'{self.name} · {self.person.name}-ийн хань'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        _clear_home_cache()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        _clear_home_cache()
 
 
 class PersonPhoto(models.Model):
